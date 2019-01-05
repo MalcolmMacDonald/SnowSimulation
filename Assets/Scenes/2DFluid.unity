@@ -384,19 +384,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSize: 50
-  timeStep: 1
+  timeStep: 0.02
   drawGrid: 0
   drawVelocities: 1
-  drawDensities: 0
-  drawGradient: 1
-  drawIncompressibleField: 0
-  solverIterations: 1
-  densitySourceRate: 200
+  drawDensities: 1
+  solverIterations: 10
+  densitySourceRate: 50
   velocitySourceRate: 1
-  diffusionRate: 1
+  diffusionRate: 0.1
   viscocity: 10
   gridColor: {r: 1, g: 1, b: 1, a: 1}
   velocitiesColor: {r: 1, g: 0, b: 0, a: 1}
   densitiesColor: {r: 0, g: 0.13914871, b: 1, a: 1}
-  gradientColor: {r: 1, g: 0.80482066, b: 0, a: 1}
-  incompressibleColor: {r: 0.016202211, g: 1, b: 0, a: 1}
