@@ -384,15 +384,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSize: 100
-  timeStep: 0.02
+  timeStep: 1
   drawGrid: 0
-  drawVelocities: 0
+  drawVelocities: 1
   drawDensities: 1
-  solverIterations: 4
-  densitySourceRate: 500
-  velocitySourceRate: 5000
+  solverIterations: 1
+  densitySourceRate: 5000
+  velocitySourceRate: 50000
   diffusionRate: 0.1
-  viscocity: 1
+  viscocity: 10
   vorticityMutiplier: 500
   gridColor: {r: 1, g: 1, b: 1, a: 1}
   velocitiesColor: {r: 1, g: 0, b: 0, a: 1}
