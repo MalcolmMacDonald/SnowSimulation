@@ -130,8 +130,8 @@ public class SnowflakeManager : MonoBehaviour
     private void Respawn(int i)
     {
         Vector3 randomOnPlane = new Vector3();
-        randomOnPlane.x = transform.position.x + (Random.Range(0, 1f) * (xSize - 1)) * scale;
-        randomOnPlane.z = transform.position.z + (Random.Range(0, 1f) * (zSize - 1)) * scale;
+        // randomOnPlane.x = transform.position.x + ( Random.Range(0, 1f) * (xSize - 1)) * scale;
+        // randomOnPlane.z = transform.position.z + (Random.Range(0, 1f) * (zSize - 1)) * scale;
         randomOnPlane.y = transform.position.y + 14;
         positions[i] = randomOnPlane;
         velocities[i] = Vector3.down;
