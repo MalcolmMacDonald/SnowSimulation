@@ -91,7 +91,7 @@ public class SimpleFluid : MonoBehaviour
 
         VelocityStep();
 
-        DensityStep();
+        //  DensityStep();
 
         ParticlesStep();
 
