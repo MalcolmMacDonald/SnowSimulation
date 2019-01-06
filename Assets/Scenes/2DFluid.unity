@@ -472,7 +472,6 @@ MonoBehaviour:
   timeStep: 0.02
   drawGrid: 0
   drawVelocities: 0
-  drawDensities: 0
   drawVorticity: 0
   drawParticles: 1
   addObstacle: 1
@@ -482,11 +481,10 @@ MonoBehaviour:
   velocitySourceRate: 10
   diffusionRate: 0.01
   viscocity: 0.001
-  vorticityMutiplier: 0.1
+  vorticityMutiplier: 0.05
   particleVelocity: 30
   gridColor: {r: 1, g: 1, b: 1, a: 1}
   velocitiesColor: {r: 1, g: 0, b: 0, a: 1}
-  densitiesColor: {r: 0, g: 0.13914871, b: 1, a: 1}
   particlesColor: {r: 1, g: 1, b: 1, a: 1}
   particleGridSize: 100
 --- !u!1 &2101063364
