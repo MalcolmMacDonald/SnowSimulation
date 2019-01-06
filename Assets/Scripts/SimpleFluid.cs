@@ -13,8 +13,8 @@ public class SimpleFluid : MonoBehaviour
 
 
 
-    Vector2[,] velocities;
-    Vector2[,] prevVelocities;
+    Vector3[,,] velocities;
+    Vector3[,,] prevVelocities;
 
     public bool drawGrid;
     public bool drawVelocities;
@@ -55,8 +55,8 @@ public class SimpleFluid : MonoBehaviour
         particleCount = particleGridSize * particleGridSize;
         particles = new Vector2[particleCount];
         particleVelocities = new Vector2[particleCount];
-        velocities = new Vector2[gridSize + 2, gridSize + 2];
-        prevVelocities = new Vector2[gridSize + 2, gridSize + 2];
+        velocities = new Vector3[gridSize + 2, gridSize + 2, gridSize + 2];
+        prevVelocities = new Vector3[gridSize + 2, gridSize + 2, gridSize + 2];
 
 
         Vector2 previousMousePos = Camera.main.ScreenToViewportPoint(Input.mousePosition) * gridSize;
@@ -168,10 +168,10 @@ public class SimpleFluid : MonoBehaviour
             float bottomDistance = y - j0;
             float topDistance = 1 - bottomDistance;
 
-            Vector2 bottomLeftVel = velocities[i0, j0];
-            Vector2 bottomRightVel = velocities[i1, j0];
-            Vector2 topLeftVel = velocities[i0, j1];
-            Vector2 topRightVel = velocities[i0, j1];
+            Vector2 bottomLeftVel = velocities[i0, j0, 0];
+            Vector2 bottomRightVel = velocities[i1, j0, 0];
+            Vector2 topLeftVel = velocities[i0, j1, 0];
+            Vector2 topRightVel = velocities[i0, j1, 0];
 
             Vector2 leftVelLerp = rightDistance * (topDistance * bottomLeftVel + bottomDistance * topLeftVel);
             Vector2 rightVelLerp = leftDistance * (topDistance * bottomRightVel + bottomDistance * topRightVel);
@@ -222,9 +222,9 @@ public class SimpleFluid : MonoBehaviour
 
 
 
-    void SwapGrids(ref Vector2[,] a, ref Vector2[,] b)
+    void SwapGrids(ref Vector3[,,] a, ref Vector3[,,] b)
     {
-        Vector2[,] temp = a;
+        Vector3[,,] temp = a;
         a = b;
         b = temp;
     }
@@ -246,7 +246,7 @@ public class SimpleFluid : MonoBehaviour
         Vector2 currentDir = (mousePos - previousMousePos) * velocitySourceRate;
         if (Input.GetMouseButton(0))
         {
-            velocities[(int)mousePos.x, (int)mousePos.y] = currentDir;
+            velocities[(int)mousePos.x, (int)mousePos.y, 0] = currentDir;
         }
 
         previousMousePos = mousePos;
@@ -260,11 +260,11 @@ public class SimpleFluid : MonoBehaviour
 
 
 
-    void Diffuse(int b, ref Vector2[,] x, Vector2[,] x0, float diff, float dt)
+    void Diffuse(int b, ref Vector3[,,] x, Vector3[,,] x0, float diff, float dt)
     {
 
         float a = dt * diff * gridSize * gridSize;
-        Vector2[,] xCopy = x;
+        Vector3[,,] xCopy = x;
         for (int k = 0; k < solverIterations; k++)
         {
             for (int i = 1; i <= gridSize; i++)
@@ -272,21 +272,21 @@ public class SimpleFluid : MonoBehaviour
                 for (int j = 1; j <= gridSize; j++)
                 {
 
-                    Vector2 thisPrev = x0[i, j];
-                    Vector2 prev0 = xCopy[i - 1, j];
-                    Vector2 prev1 = xCopy[i + 1, j];
-                    Vector2 prev2 = xCopy[i, j - 1];
-                    Vector2 prev3 = xCopy[i, j + 1];
+                    Vector2 thisPrev = x0[i, j, 0];
+                    Vector2 prev0 = xCopy[i - 1, j, 0];
+                    Vector2 prev1 = xCopy[i + 1, j, 0];
+                    Vector2 prev2 = xCopy[i, j - 1, 0];
+                    Vector2 prev3 = xCopy[i, j + 1, 0];
 
 
-                    x[i, j] = (thisPrev + a * (prev0 + prev1 + prev2 + prev3)) / (1 + 4 * a);
+                    x[i, j, 0] = (thisPrev + a * (prev0 + prev1 + prev2 + prev3)) / (1 + 4 * a);
                 }
             }
             SetBoundaries(b, ref x);
         }
 
     }
-    void Advect(int b, ref Vector2[,] d, Vector2[,] d0, float dt)
+    void Advect(int b, ref Vector3[,,] d, Vector3[,,] d0, float dt)
     {
 
         int i, j, i0, j0, i1, j1;
@@ -297,8 +297,8 @@ public class SimpleFluid : MonoBehaviour
         {
             for (j = 1; j <= gridSize; j++)
             {
-                x = i - (dt0 * d[i, j].x);
-                y = j - (dt0 * d[i, j].y);
+                x = i - (dt0 * d[i, j, 0].x);
+                y = j - (dt0 * d[i, j, 0].y);
                 if (x < 1.5f)
                 {
                     x = 1.5f;
@@ -325,22 +325,22 @@ public class SimpleFluid : MonoBehaviour
                 bottomDistance = y - j0;
                 topDistance = 1 - bottomDistance;
 
-                Vector2 bottomLeft = d0[i0, j0];
-                Vector2 bottomRight = d0[i1, j0];
-                Vector2 topLeft = d0[i0, j1];
-                Vector2 topRight = d0[i1, j1];
+                Vector2 bottomLeft = d0[i0, j0, 0];
+                Vector2 bottomRight = d0[i1, j0, 0];
+                Vector2 topLeft = d0[i0, j1, 0];
+                Vector2 topRight = d0[i1, j1, 0];
 
                 Vector2 leftLerp = rightDistance * (topDistance * bottomLeft + bottomDistance * topLeft);
                 Vector2 rightLerp = leftDistance * (topDistance * bottomRight + bottomDistance * topRight);
 
-                d[i, j] = leftLerp + rightLerp;
+                d[i, j, 0] = leftLerp + rightLerp;
             }
         }
         SetBoundaries(b, ref d);
 
 
     }
-    void Project(ref Vector2[,] u)
+    void Project(ref Vector3[,,] u)
     {
         int i, j, k;
         float h;
@@ -351,7 +351,7 @@ public class SimpleFluid : MonoBehaviour
         {
             for (j = 1; j <= gridSize; j++)
             {
-                divergence[i, j] = -0.5f * h * (u[i + 1, j].x - u[i - 1, j].x + u[i, j + 1].y - u[i, j - 1].y);
+                divergence[i, j] = -0.5f * h * (u[i + 1, j, 0].x - u[i - 1, j, 0].x + u[i, j + 1, 0].y - u[i, j - 1, 0].y);
             }
         }
 
@@ -375,16 +375,16 @@ public class SimpleFluid : MonoBehaviour
         {
             for (j = 1; j <= gridSize; j++)
             {
-                u[i, j].x -= 0.5f * gridSize * (pressure[i + 1, j] - pressure[i - 1, j]);
-                u[i, j].y -= 0.5f * gridSize * (pressure[i, j + 1] - pressure[i, j - 1]);
+                u[i, j, 0].x -= 0.5f * gridSize * (pressure[i + 1, j] - pressure[i - 1, j]);
+                u[i, j, 0].y -= 0.5f * gridSize * (pressure[i, j + 1] - pressure[i, j - 1]);
             }
         }
         SetBoundaries(1, ref u);
     }
-    void AddVorticity(float multiplier, ref Vector2[,] u, Vector2[,] prevU)
+    void AddVorticity(float multiplier, ref Vector3[,,] u, Vector3[,,] prevU)
     {
 
-        Vector2[,] curl = new Vector2[gridSize + 2, gridSize + 2];
+        Vector3[,,] curl = new Vector3[gridSize + 2, gridSize + 2, gridSize + 2];
         float h = 1f / gridSize;
 
 
@@ -392,7 +392,7 @@ public class SimpleFluid : MonoBehaviour
         {
             for (int j = 1; j <= gridSize; j++)
             {
-                curl[i, j] = 0.5f * new Vector2((prevU[i + 1, j].x - prevU[i - 1, j].x), prevU[i, j + 1].y - prevU[i, j - 1].y);
+                curl[i, j, 0] = 0.5f * new Vector3((prevU[i + 1, j, 0].x - prevU[i - 1, j, 0].x), prevU[i, j + 1, 0].y - prevU[i, j - 1, 0].y);
             }
         }
 
@@ -402,10 +402,10 @@ public class SimpleFluid : MonoBehaviour
             for (int j = 1; j <= gridSize; j++)
             {
 
-                float dwdx = (curl[i + 1, j].x - curl[i - 1, j].x) * 0.5f;
-                float dwdy = (curl[i, j + 1].y - curl[i, j - 1].y) * 0.5f;
+                float dwdx = (curl[i + 1, j, 0].x - curl[i - 1, j, 0].x) * 0.5f;
+                float dwdy = (curl[i, j + 1, 0].y - curl[i, j - 1, 0].y) * 0.5f;
 
-                Vector2 normCurl = new Vector2(dwdx, dwdy).normalized * multiplier;
+                Vector3 normCurl = new Vector3(dwdx, dwdy).normalized * multiplier;
                 //  Vector2 gradient = 0.5f * new Vector2(curl[i + 1, j].magnitude - curl[i - 1, j].magnitude, +curl[i, j + 1].magnitude - curl[i, j - 1].magnitude).normalized;
 
                 //   Vector2 multipliedVorticity = Vector3.Cross(curl[i, j], gradient) * h * vorticityMutiplier;
@@ -413,14 +413,14 @@ public class SimpleFluid : MonoBehaviour
                 {
                     //      Debug.DrawRay(new Vector2(0.5f + i, 0.5f + j) * cellSize, Vector2.ClampMagnitude(multipliedVorticity, cellSize), Color.yellow);
                 }
-                u[i, j] += normCurl;
+                u[i, j, 0] += normCurl;
                 //    v[i, j] += multipliedVorticity.y;
             }
         }
     }
 
 
-    void SetBoundaries(int b, ref Vector2[,] x)
+    void SetBoundaries(int b, ref Vector3[,,] x)
     {
         for (int i = 0; i <= gridSize; i++)
         {
@@ -432,10 +432,10 @@ public class SimpleFluid : MonoBehaviour
  */
 
 
-            x[0, i] = Vector2.zero;
-            x[gridSize + 1, i] = Vector2.zero;
-            x[i, 0] = Vector2.zero;
-            x[i, gridSize + 1] = Vector2.zero;
+            x[0, i, 0] = Vector2.zero;
+            x[gridSize + 1, i, 0] = Vector2.zero;
+            x[i, 0, 0] = Vector2.zero;
+            x[i, gridSize + 1, 0] = Vector2.zero;
 
         }
 
@@ -445,14 +445,14 @@ public class SimpleFluid : MonoBehaviour
             {
                 for (int j = gridSize / 3; j < (2 * gridSize / 3); j++)
                 {
-                    x[i, j] = Vector2.zero;
+                    x[i, j, 0] = Vector2.zero;
                 }
             }
         }
-        x[0, 0] = 0.5f * (x[1, 0] + x[0, 1]);
-        x[0, gridSize + 1] = 0.5f * (x[1, gridSize + 1] + x[0, gridSize]);
-        x[gridSize + 1, 0] = 0.5f * (x[gridSize, 0] + x[gridSize + 1, 1]);
-        x[gridSize + 1, gridSize + 1] = 0.5f * (x[gridSize, gridSize + 1] + x[gridSize + 1, gridSize]);
+        x[0, 0, 0] = 0.5f * (x[1, 0, 0] + x[0, 1, 0]);
+        x[0, gridSize + 1, 0] = 0.5f * (x[1, gridSize + 1, 0] + x[0, gridSize, 0]);
+        x[gridSize + 1, 0, 0] = 0.5f * (x[gridSize, 0, 0] + x[gridSize + 1, 1, 0]);
+        x[gridSize + 1, gridSize + 1, 0] = 0.5f * (x[gridSize, gridSize + 1, 0] + x[gridSize + 1, gridSize, 0]);
 
     }
 
@@ -479,7 +479,7 @@ public class SimpleFluid : MonoBehaviour
         {
             for (int j = 0; j < gridSize + 2; j++)
             {
-                Debug.DrawRay(new Vector2(0.5f + i, 0.5f + j) * cellSize, Vector2.ClampMagnitude(velocities[i, j], cellSize), velocitiesColor);
+                Debug.DrawRay(new Vector2(0.5f + i, 0.5f + j) * cellSize, Vector2.ClampMagnitude(velocities[i, j, 0], cellSize), velocitiesColor);
             }
         }
     }
@@ -492,25 +492,47 @@ public class SimpleFluid : MonoBehaviour
 
             if (!Physics.Linecast(Camera.main.transform.position, particlePos))
             {
-                DrawRect(particlePos, (Vector2.up + Vector2.right) * cellSize * 0.1f, particlesColor);
+                DrawCube(particlePos, Vector3.one * cellSize * 0.1f, particlesColor);
             }
         }
     }
 
 
-    void DrawRect(Vector2 position, Vector2 scale, Color color)
+    void DrawCube(Vector3 position, Vector3 scale, Color color)
     {
-        Vector2 topLeft = position + Vector2.Scale(scale, new Vector2(-1, 1));
-        Vector2 topRight = position + Vector2.Scale(scale, Vector2.one);
-        Vector2 bottomLeft = position + Vector2.Scale(scale, -Vector2.one);
-        Vector2 bottomRight = position + Vector2.Scale(scale, new Vector2(1, -1));
+        DrawCubePoints(CubePoints(position, scale, Quaternion.identity), color);
+    }
+    Vector3[] CubePoints(Vector3 center, Vector3 extents, Quaternion rotation)
+    {
+        Vector3[] points = new Vector3[8];
+        points[0] = rotation * Vector3.Scale(extents, new Vector3(1, 1, 1)) + center;
+        points[1] = rotation * Vector3.Scale(extents, new Vector3(1, 1, -1)) + center;
+        points[2] = rotation * Vector3.Scale(extents, new Vector3(1, -1, 1)) + center;
+        points[3] = rotation * Vector3.Scale(extents, new Vector3(1, -1, -1)) + center;
+        points[4] = rotation * Vector3.Scale(extents, new Vector3(-1, 1, 1)) + center;
+        points[5] = rotation * Vector3.Scale(extents, new Vector3(-1, 1, -1)) + center;
+        points[6] = rotation * Vector3.Scale(extents, new Vector3(-1, -1, 1)) + center;
+        points[7] = rotation * Vector3.Scale(extents, new Vector3(-1, -1, -1)) + center;
 
-        Debug.DrawLine(topLeft, topRight, color);
-        Debug.DrawLine(topRight, bottomRight, color);
-        Debug.DrawLine(bottomRight, bottomLeft, color);
-        Debug.DrawLine(bottomLeft, topLeft, color);
-
+        return points;
     }
 
+    void DrawCubePoints(Vector3[] points, Color cubeColor)
+    {
+        Debug.DrawLine(points[0], points[1], cubeColor);
+        Debug.DrawLine(points[0], points[2], cubeColor);
+        Debug.DrawLine(points[0], points[4], cubeColor);
+        Debug.DrawLine(points[7], points[6], cubeColor);
+        Debug.DrawLine(points[7], points[5], cubeColor);
+        Debug.DrawLine(points[7], points[3], cubeColor);
+
+        Debug.DrawLine(points[1], points[3], cubeColor);
+        Debug.DrawLine(points[1], points[5], cubeColor);
+        Debug.DrawLine(points[2], points[3], cubeColor);
+        Debug.DrawLine(points[2], points[6], cubeColor);
+
+        Debug.DrawLine(points[4], points[5], cubeColor);
+        Debug.DrawLine(points[4], points[6], cubeColor);
+    }
 
 }
