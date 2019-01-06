@@ -228,7 +228,6 @@ public class SimpleFluid : MonoBehaviour
             //            newVelocity = newVelocity.normalized * (newVelocity.magnitude + (leftLerp + rightLerp));
             //   newVelocity = newVelocity.normalized * Mathf.Clamp(newVelocity.magnitude - (leftLerp + rightLerp), 0, newVelocity.magnitude);
 
-
             particleVelocities[i] = newVelocity;
         }
         for (int i = 0; i < particleCount; i++)
@@ -242,13 +241,13 @@ public class SimpleFluid : MonoBehaviour
                 if (newPos.x < 1 || newPos.x > gridSize || newPos.y < 1 || newPos.y > gridSize)
                 {
                     particleVelocities[i] = Vector2.zero;
-                    newPos = new Vector2(Random.Range(1, gridSize), 2);
+                    newPos = new Vector2(Random.Range(1, gridSize), 1);
                 }
                 if (addObstacle)
                 {
                     if ((particles[i].x >= (gridSize / 3) - 1 && particles[i].x <= 2 * gridSize / 3 + 1) && (particles[i].y >= gridSize / 3 - 1 && particles[i].y <= 2 * gridSize / 3 + 1))
                     {
-                        newPos = new Vector2(Random.Range(1, gridSize), 2);
+                        newPos = new Vector2(Random.Range(1, gridSize), 1);
                         particleVelocities[i] = Vector2.zero;
                     }
                 }
@@ -308,7 +307,7 @@ public class SimpleFluid : MonoBehaviour
         mousePos.x = Mathf.Clamp(mousePos.x, 0, gridSize);
         mousePos.y = Mathf.Clamp(mousePos.y, 0, gridSize);
         mousePos += Vector2.one * 0.5f;
-        Vector2 currentDir = Vector2.up * velocitySourceRate;// (mousePos - previousMousePos) * velocitySourceRate;
+        Vector2 currentDir = (mousePos - previousMousePos) * velocitySourceRate;
         if (Input.GetMouseButton(0))
         {
             u[(int)mousePos.x, (int)mousePos.y] = currentDir.x;
@@ -451,7 +450,7 @@ public class SimpleFluid : MonoBehaviour
     void AddVorticity(float multiplier, ref float[,] u, ref float[,] v, float[,] u0, float[,] v0)
     {
 
-        float[,] curl = new float[gridSize + 2, gridSize + 2];
+        Vector2[,] curl = new Vector2[gridSize + 2, gridSize + 2];
         float h = 1f / gridSize;
 
 
@@ -459,7 +458,7 @@ public class SimpleFluid : MonoBehaviour
         {
             for (int j = 1; j <= gridSize; j++)
             {
-                curl[i, j] = 0.5f * ((v0[i, j + 1] - v0[i, j - 1]) - (u0[i + 1, j] - u0[i - 1, j]));
+                curl[i, j] = 0.5f * new Vector2((u0[i + 1, j] - u0[i - 1, j]), v0[i, j + 1] - v0[i, j - 1]);
             }
         }
 
@@ -469,8 +468,8 @@ public class SimpleFluid : MonoBehaviour
             for (int j = 1; j <= gridSize; j++)
             {
 
-                float dwdx = (curl[i + 1, j] - curl[i - 1, j]) * 0.5f;
-                float dwdy = (curl[i, j + 1] - curl[i, j - 1]) * 0.5f;
+                float dwdx = (curl[i + 1, j].x - curl[i - 1, j].x) * 0.5f;
+                float dwdy = (curl[i, j + 1].y - curl[i, j - 1].y) * 0.5f;
 
                 Vector2 normCurl = new Vector2(dwdx, dwdy).normalized * multiplier;
                 //  Vector2 gradient = 0.5f * new Vector2(curl[i + 1, j].magnitude - curl[i - 1, j].magnitude, +curl[i, j + 1].magnitude - curl[i, j - 1].magnitude).normalized;
