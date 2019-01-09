@@ -468,25 +468,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67b00f3119528cb459e07d2f345bb341, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSize: 50
+  gridSize: 25
   timeStep: 0.02
   drawGrid: 0
-  drawVelocities: 0
+  drawVelocities: 1
   drawVorticity: 0
   drawParticles: 1
   addObstacle: 0
   resetParticlePositionAtBoundary: 1
   solverIterations: 10
   densitySourceRate: 10
-  velocitySourceRate: 10
+  velocitySourceRate: 5
   diffusionRate: 0.01
   viscocity: 0.01
-  vorticityMutiplier: 0.001
+  vorticityMutiplier: 0.0001
   particleVelocity: 100
   gridColor: {r: 1, g: 1, b: 1, a: 1}
   velocitiesColor: {r: 1, g: 0, b: 0, a: 1}
   particlesColor: {r: 1, g: 1, b: 1, a: 1}
-  particleGridSize: 50
+  particleGridSize: 25
 --- !u!1 &2101063364
 GameObject:
   m_ObjectHideFlags: 0

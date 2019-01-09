@@ -69,7 +69,9 @@ public class SimpleFluid : MonoBehaviour
         {
             for (int j = 0; j < particleGridSize; j++)
             {
-                particles[j + (i * particleGridSize)] = ((Vector2.one / 2f) + new Vector2(i, j)) * particleCellSize;
+                particles[j + (i * particleGridSize)] = ((Vector3)(Vector2.one / 2f) + new Vector3(i, j)) * particleCellSize;
+                particles[j + (i * particleGridSize)].z = 1;
+
             }
         }
 
@@ -170,7 +172,7 @@ public class SimpleFluid : MonoBehaviour
         Vector2 currentDir = (mousePos - previousMousePos) * velocitySourceRate;
         if (Input.GetMouseButton(0))
         {
-            velocities[(int)mousePos.x, (int)mousePos.y, 0] = currentDir;
+            velocities[(int)mousePos.x, (int)mousePos.y, 1] = currentDir;
         }
 
         previousMousePos = mousePos;
@@ -189,22 +191,24 @@ public class SimpleFluid : MonoBehaviour
 
         float a = dt * diff * gridSize * gridSize;
         Vector3[,,] xCopy = x;
-        for (int k = 0; k < solverIterations; k++)
+        for (int q = 0; q < solverIterations; q++)
         {
+
             for (int i = 1; i <= gridSize; i++)
             {
                 for (int j = 1; j <= gridSize; j++)
                 {
 
-                    Vector2 thisPrev = x0[i, j, 0];
-                    Vector2 prev0 = xCopy[i - 1, j, 0];
-                    Vector2 prev1 = xCopy[i + 1, j, 0];
-                    Vector2 prev2 = xCopy[i, j - 1, 0];
-                    Vector2 prev3 = xCopy[i, j + 1, 0];
+                    Vector2 thisPrev = x0[i, j, 1];
+                    Vector2 prev0 = xCopy[i - 1, j, 1];
+                    Vector2 prev1 = xCopy[i + 1, j, 1];
+                    Vector2 prev2 = xCopy[i, j - 1, 1];
+                    Vector2 prev3 = xCopy[i, j + 1, 1];
 
 
-                    x[i, j, 0] = (thisPrev + a * (prev0 + prev1 + prev2 + prev3)) / (1 + 4 * a);
+                    x[i, j, 1] = (thisPrev + a * (prev0 + prev1 + prev2 + prev3)) / (1 + 4 * a);
                 }
+
             }
             SetBoundaries(b, ref x);
         }
@@ -213,19 +217,17 @@ public class SimpleFluid : MonoBehaviour
     void Advect(int b, ref Vector3[,,] d, Vector3[,,] d0, float dt)
     {
 
-        int i, j;
-        float dt0;
-        dt0 = dt * gridSize;
+        float dt0 = dt * gridSize;
 
-        for (i = 1; i <= gridSize; i++)
+        for (int i = 1; i <= gridSize; i++)
         {
-            for (j = 1; j <= gridSize; j++)
+            for (int j = 1; j <= gridSize; j++)
             {
                 for (int k = 1; k <= gridSize; k++)
                 {
 
-                    Vector3 newPos = dt0 * d[i, j, k];
-                    d[i, j, k] = TrilinearInterpolation(newPos, d0);
+                    Vector3 newPos = dt0 * d[i, j, 1];
+                    d[i, j, 1] = TrilinearInterpolation(newPos, d0);
                 }
             }
         }
@@ -244,7 +246,7 @@ public class SimpleFluid : MonoBehaviour
         {
             for (j = 1; j <= gridSize; j++)
             {
-                divergence[i, j] = -0.5f * h * (u[i + 1, j, 0].x - u[i - 1, j, 0].x + u[i, j + 1, 0].y - u[i, j - 1, 0].y);
+                divergence[i, j] = -0.5f * h * (u[i + 1, j, 1].x - u[i - 1, j, 1].x + u[i, j + 1, 1].y - u[i, j - 1, 1].y);
             }
         }
 
@@ -268,8 +270,8 @@ public class SimpleFluid : MonoBehaviour
         {
             for (j = 1; j <= gridSize; j++)
             {
-                u[i, j, 0].x -= 0.5f * gridSize * (pressure[i + 1, j] - pressure[i - 1, j]);
-                u[i, j, 0].y -= 0.5f * gridSize * (pressure[i, j + 1] - pressure[i, j - 1]);
+                u[i, j, 1].x -= 0.5f * gridSize * (pressure[i + 1, j] - pressure[i - 1, j]);
+                u[i, j, 1].y -= 0.5f * gridSize * (pressure[i, j + 1] - pressure[i, j - 1]);
             }
         }
         SetBoundaries(1, ref u);
@@ -285,7 +287,7 @@ public class SimpleFluid : MonoBehaviour
         {
             for (int j = 1; j <= gridSize; j++)
             {
-                curl[i, j, 0] = 0.5f * new Vector3((prevU[i + 1, j, 0].x - prevU[i - 1, j, 0].x), prevU[i, j + 1, 0].y - prevU[i, j - 1, 0].y);
+                curl[i, j, 0] = 0.5f * new Vector3((prevU[i + 1, j, 1].x - prevU[i - 1, j, 1].x), prevU[i, j + 1, 1].y - prevU[i, j - 1, 1].y);
             }
         }
 
@@ -295,8 +297,8 @@ public class SimpleFluid : MonoBehaviour
             for (int j = 1; j <= gridSize; j++)
             {
 
-                float dwdx = (curl[i + 1, j, 0].x - curl[i - 1, j, 0].x) * 0.5f;
-                float dwdy = (curl[i, j + 1, 0].y - curl[i, j - 1, 0].y) * 0.5f;
+                float dwdx = (curl[i + 1, j, 1].x - curl[i - 1, j, 1].x) * 0.5f;
+                float dwdy = (curl[i, j + 1, 1].y - curl[i, j - 1, 1].y) * 0.5f;
 
                 Vector3 normCurl = new Vector3(dwdx, dwdy).normalized * multiplier;
                 //  Vector2 gradient = 0.5f * new Vector2(curl[i + 1, j].magnitude - curl[i - 1, j].magnitude, +curl[i, j + 1].magnitude - curl[i, j - 1].magnitude).normalized;
@@ -306,7 +308,7 @@ public class SimpleFluid : MonoBehaviour
                 {
                     //      Debug.DrawRay(new Vector2(0.5f + i, 0.5f + j) * cellSize, Vector2.ClampMagnitude(multipliedVorticity, cellSize), Color.yellow);
                 }
-                u[i, j, 0] += normCurl;
+                u[i, j, 1] += normCurl;
                 //    v[i, j] += multipliedVorticity.y;
             }
         }
@@ -325,10 +327,10 @@ public class SimpleFluid : MonoBehaviour
  */
 
 
-            x[0, i, 0] = Vector2.zero;
-            x[gridSize + 1, i, 0] = Vector2.zero;
-            x[i, 0, 0] = Vector2.zero;
-            x[i, gridSize + 1, 0] = Vector2.zero;
+            x[0, i, 1] = Vector2.zero;
+            x[gridSize + 1, i, 1] = Vector2.zero;
+            x[i, 0, 1] = Vector2.zero;
+            x[i, gridSize + 1, 1] = Vector2.zero;
 
         }
 
@@ -338,15 +340,15 @@ public class SimpleFluid : MonoBehaviour
             {
                 for (int j = gridSize / 3; j < (2 * gridSize / 3); j++)
                 {
-                    x[i, j, 0] = Vector2.zero;
+                    x[i, j, 1] = Vector2.zero;
                 }
             }
         }
-        x[0, 0, 0] = 0.5f * (x[1, 0, 0] + x[0, 1, 0]);
-        x[0, gridSize + 1, 0] = 0.5f * (x[1, gridSize + 1, 0] + x[0, gridSize, 0]);
-        x[gridSize + 1, 0, 0] = 0.5f * (x[gridSize, 0, 0] + x[gridSize + 1, 1, 0]);
-        x[gridSize + 1, gridSize + 1, 0] = 0.5f * (x[gridSize, gridSize + 1, 0] + x[gridSize + 1, gridSize, 0]);
-
+        /*     x[0, 0, 0] = 0.5f * (x[1, 0, 0] + x[0, 1, 0]);
+            x[0, gridSize + 1, 0] = 0.5f * (x[1, gridSize + 1, 0] + x[0, gridSize, 0]);
+            x[gridSize + 1, 0, 0] = 0.5f * (x[gridSize, 0, 0] + x[gridSize + 1, 1, 0]);
+            x[gridSize + 1, gridSize + 1, 0] = 0.5f * (x[gridSize, gridSize + 1, 0] + x[gridSize + 1, gridSize, 0]);
+    */
     }
 
     void AdvectParticleVelocities(ref Vector3[,,] v)
@@ -363,7 +365,7 @@ public class SimpleFluid : MonoBehaviour
     {
         for (int i = 0; i < particleCount; i++)
         {
-            Vector2 newPos = p[i] + v[i] * timeStep * particleVelocity;
+            Vector3 newPos = p[i] + v[i] * timeStep * particleVelocity;
 
 
 
@@ -371,15 +373,15 @@ public class SimpleFluid : MonoBehaviour
             {
                 if (newPos.x < 1 || newPos.x > gridSize || newPos.y < 1 || newPos.y > gridSize)
                 {
-                    v[i] = Vector2.zero;
-                    newPos = new Vector2(UnityEngine.Random.Range(1, gridSize), 1);
+                    v[i] = Vector3.zero;
+                    newPos = new Vector3(UnityEngine.Random.Range(1, gridSize), 1, 1);
                 }
                 if (addObstacle)
                 {
                     if ((particles[i].x >= (gridSize / 3) - 1 && particles[i].x <= 2 * gridSize / 3 + 1) && (particles[i].y >= gridSize / 3 - 1 && particles[i].y <= 2 * gridSize / 3 + 1))
                     {
-                        newPos = new Vector2(UnityEngine.Random.Range(1, gridSize), 1);
-                        v[i] = Vector2.zero;
+                        newPos = new Vector3(UnityEngine.Random.Range(1, gridSize), 1, 1);
+                        v[i] = Vector3.zero;
                     }
                 }
             }
@@ -417,7 +419,10 @@ public class SimpleFluid : MonoBehaviour
         {
             for (int j = 0; j < gridSize + 2; j++)
             {
-                Debug.DrawRay(new Vector2(0.5f + i, 0.5f + j) * cellSize, Vector2.ClampMagnitude(velocities[i, j, 0], cellSize), velocitiesColor);
+                for (int k = 0; k < gridSize + 2; k++)
+                {
+                    Debug.DrawRay(new Vector3(0.5f + i, 0.5f + j, 0.5f + k) * cellSize, Vector2.ClampMagnitude(velocities[i, j, k], cellSize), velocitiesColor);
+                }
             }
         }
     }
@@ -426,7 +431,7 @@ public class SimpleFluid : MonoBehaviour
     {
         for (int i = 0; i < particleCount; i++)
         {
-            Vector2 particlePos = new Vector2(0.5f + particles[i].x, 0.5f + particles[i].y) * cellSize;
+            Vector3 particlePos = new Vector3(0.5f + particles[i].x, 0.5f + particles[i].y, 0.5f + particles[i].z) * cellSize;
 
             //  if (!Physics.Linecast(Camera.main.transform.position, particlePos))
             {
@@ -478,9 +483,9 @@ public class SimpleFluid : MonoBehaviour
         float y = position.y;
         float z = position.z;
 
-        x = Mathf.Clamp(x, 0.5f, gridSize + 0.5f);
-        y = Mathf.Clamp(y, 0.5f, gridSize + 0.5f);
-        z = Mathf.Clamp(z, 0.5f, gridSize + 0.5f);
+        x = Mathf.Clamp(x, 0.5f, gridSize - 0.5f);
+        y = Mathf.Clamp(y, 0.5f, gridSize - 0.5f);
+        z = Mathf.Clamp(z, 0.5f, gridSize - 0.5f);
 
         int leftX = Mathf.RoundToInt(x);
         int rightX = leftX + 1;
