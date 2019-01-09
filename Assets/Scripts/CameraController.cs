@@ -30,7 +30,7 @@ public class CameraController : MonoBehaviour
 
         if (rotationInput.magnitude > maxRotationDistance)
         {
-            rotationVelocity -= (rotationInput.normalized * (rotationInput.magnitude - maxRotationDistance)) * returnSpeed;
+            //      rotationVelocity -= (rotationInput.normalized * (rotationInput.magnitude - maxRotationDistance)) * returnSpeed;
         }
 
         rotationInput += rotationVelocity;

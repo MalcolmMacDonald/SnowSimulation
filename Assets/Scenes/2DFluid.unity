@@ -184,7 +184,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 707541869}
   m_LocalRotation: {x: -0, y: -0, z: -0.0000000037252899, w: 1}
-  m_LocalPosition: {x: 0.13920122, y: 0.16590784, z: -5.5380964}
+  m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 2.945008, y: 2.945008, z: 2.9450088}
   m_Children: []
   m_Father: {fileID: 2101063365}
@@ -360,7 +360,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1840767890
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -474,9 +474,9 @@ MonoBehaviour:
   drawVelocities: 0
   drawVorticity: 0
   drawParticles: 1
-  addObstacle: 1
+  addObstacle: 0
   resetParticlePositionAtBoundary: 1
-  solverIterations: 50
+  solverIterations: 10
   densitySourceRate: 10
   velocitySourceRate: 10
   diffusionRate: 0.01
@@ -510,7 +510,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2101063364}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.49200007, y: 0.4940001, z: 0}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: 0.5}
   m_LocalScale: {x: 0.33955765, y: 0.3395576, z: 0.33955768}
   m_Children:
   - {fileID: 707541872}
