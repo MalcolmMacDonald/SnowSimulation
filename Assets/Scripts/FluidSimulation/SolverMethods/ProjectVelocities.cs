@@ -10,6 +10,7 @@ public partial class SimpleFluid
         float h = 1f / gridSize;
         float[,,] pressure = new float[gridSize + 2, gridSize + 2, gridSize + 2];
         float[,,] divergence = new float[gridSize + 2, gridSize + 2, gridSize + 2];
+
         for (int i = 1; i <= gridSize; i++)
         {
             for (int j = 1; j <= gridSize; j++)
@@ -24,10 +25,11 @@ public partial class SimpleFluid
             }
         }
 
-        //  SetFloatBoundaries(0, ref divergence);
-        //   SetFloatBoundaries(0, ref pressure); //write new float boundaries function because these have to stay as floats
+        SetFloatBoundaries(0, ref divergence);
+        SetFloatBoundaries(0, ref pressure);
 
         float[,,] pCopy = pressure;
+
         for (int q = 0; q < solverIterations; q++)
         {
             for (int i = 1; i <= gridSize; i++)
@@ -40,7 +42,8 @@ public partial class SimpleFluid
                     }
                 }
             }
-            //    SetFloatBoundaries(0, ref pressure); //this is correct, just need to rewerite SetBoundareies
+
+            SetFloatBoundaries(0, ref pressure);
         }
 
         for (int i = 1; i <= gridSize; i++)
@@ -55,6 +58,7 @@ public partial class SimpleFluid
                 }
             }
         }
+
         SetVelocityBoundaries(1, ref u);
     }
 }

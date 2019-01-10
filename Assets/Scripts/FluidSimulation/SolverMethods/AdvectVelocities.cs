@@ -6,7 +6,6 @@ public partial class SimpleFluid
 {
     void AdvectVelocities(int b, ref Vector3[,,] d, Vector3[,,] d0, float dt)
     {
-
         float dt0 = dt * gridSize;
 
         for (int i = 1; i <= gridSize; i++)
@@ -21,6 +20,7 @@ public partial class SimpleFluid
                 }
             }
         }
+
         SetVelocityBoundaries(b, ref d);
     }
 }

@@ -7,12 +7,11 @@ public partial class SimpleFluid
 
     void DiffuseVelocities(int b, ref Vector3[,,] x, Vector3[,,] x0, float diff, float dt)
     {
-
         float a = dt * diff * gridSize * gridSize;
         Vector3[,,] xCopy = x;
+
         for (int q = 0; q < solverIterations; q++)
         {
-
             for (int i = 1; i <= gridSize; i++)
             {
                 for (int j = 1; j <= gridSize; j++)
@@ -31,8 +30,8 @@ public partial class SimpleFluid
                     }
                 }
             }
+
             SetVelocityBoundaries(b, ref x);
         }
-
     }
 }

@@ -8,10 +8,7 @@ public partial class SimpleFluid
     {
         for (int i = 0; i < particleCount; i++)
         {
-
-
             particleVelocities[i] = TrilinearInterpolation(particles[i], v);
         }
-
     }
 }

@@ -57,7 +57,6 @@ public partial class SimpleFluid : MonoBehaviour
         velocities = new Vector3[gridSize + 2, gridSize + 2, gridSize + 2];
         prevVelocities = new Vector3[gridSize + 2, gridSize + 2, gridSize + 2];
 
-
         Vector2 previousMousePos = Camera.main.ScreenToViewportPoint(Input.mousePosition) * gridSize;
         previousMousePos.x = Mathf.Clamp(previousMousePos.x, 0, gridSize);
         previousMousePos.y = Mathf.Clamp(previousMousePos.y, 0, gridSize);
@@ -70,27 +69,22 @@ public partial class SimpleFluid : MonoBehaviour
             {
                 particles[j + (i * particleGridSize)] = ((Vector3)(Vector2.one / 2f) + new Vector3(i, j)) * particleCellSize;
                 particles[j + (i * particleGridSize)].z = 1;
-
             }
         }
-
     }
 
     // Update is called once per frame
     void Update()
     {
-
-
         VelocityStep();
 
-
         ParticlesStep();
-
 
         if (drawGrid)
         {
             DrawGrid();
         }
+
         if (drawVelocities)
         {
             DrawVelocities();
@@ -99,51 +93,35 @@ public partial class SimpleFluid : MonoBehaviour
         if (drawParticles)
         {
             DrawParticles();
-
         }
-
     }
 
 
     void VelocityStep()
     {
-
         AddVelocitySources();
-
 
         SwapGrids(ref velocities, ref prevVelocities);
 
-
-
-
-
         DiffuseVelocities(1, ref velocities, prevVelocities, viscocity, timeStep);
-
-
-
-
-
 
         ProjectVelocities(ref velocities);
 
         SwapGrids(ref velocities, ref prevVelocities);
-
-
-
 
         AdvectVelocities(1, ref velocities, prevVelocities, timeStep);
 
         SwapGrids(ref velocities, ref prevVelocities);
 
         AddVorticity(vorticityMutiplier, ref velocities, prevVelocities);
+
         ProjectVelocities(ref velocities);
-
-
     }
 
     void ParticlesStep()
     {
         AdvectParticleVelocities(ref velocities);
+
         MoveParticles(ref particles, ref particleVelocities);
     }
 
@@ -159,26 +137,18 @@ public partial class SimpleFluid : MonoBehaviour
 
 
 
-
-
-
-
-
-
     void DrawGrid()
     {
         for (int i = 0; i < gridSize + 2; i++)
         {
             for (int j = 0; j < gridSize + 2; j++)
             {
-                Debug.DrawRay(new Vector3(i, j) * cellSize, Vector3.right * cellSize, gridColor);
-                Debug.DrawRay(new Vector3(i, j) * cellSize, Vector3.up * cellSize, gridColor);
-
+                for (int k = 0; k < gridSize + 2; k++)
+                {
+                    DrawCube(new Vector3(i, j, k) * cellSize, Vector3.one * cellSize / 2f, gridColor);
+                }
             }
         }
-        Debug.DrawRay(new Vector3(gridSize + 2, 0) * cellSize, Vector3.up * (gridSize + 2) * cellSize, gridColor);
-        Debug.DrawRay(new Vector3(0, gridSize + 2) * cellSize, Vector3.right * (gridSize + 2) * cellSize, gridColor);
-
     }
     void DrawVelocities()
     {
@@ -200,10 +170,7 @@ public partial class SimpleFluid : MonoBehaviour
         {
             Vector3 particlePos = new Vector3(0.5f + particles[i].x, 0.5f + particles[i].y, 0.5f + particles[i].z) * cellSize;
 
-            //  if (!Physics.Linecast(Camera.main.transform.position, particlePos))
-            {
-                DrawCube(particlePos, Vector3.one * cellSize * 0.1f, particlesColor);
-            }
+            DrawCube(particlePos, Vector3.one * cellSize * 0.1f, particlesColor);
         }
     }
 
@@ -212,6 +179,7 @@ public partial class SimpleFluid : MonoBehaviour
     {
         DrawCubePoints(CubePoints(position, scale, Quaternion.identity), color);
     }
+
     Vector3[] CubePoints(Vector3 center, Vector3 extents, Quaternion rotation)
     {
         Vector3[] points = new Vector3[8];
@@ -277,7 +245,6 @@ public partial class SimpleFluid : MonoBehaviour
         float3 bottomRightFrontVel = velocities[rightX, bottomY, fromtZ];
         float3 topLeftFrontVel = velocities[leftX, topY, fromtZ];
         float3 topRightFrontVel = velocities[leftX, topY, fromtZ];
-
 
 
         float3 leftVelLerp = math.lerp(bottomLeftVel, topLeftVel, bottomDistance);
