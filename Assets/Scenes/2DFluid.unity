@@ -184,7 +184,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 707541869}
   m_LocalRotation: {x: -0, y: -0, z: -0.0000000037252899, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: -7}
   m_LocalScale: {x: 2.945008, y: 2.945008, z: 2.9450088}
   m_Children: []
   m_Father: {fileID: 2101063365}
@@ -468,25 +468,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67b00f3119528cb459e07d2f345bb341, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSize: 25
-  timeStep: 0.02
+  gridSize: 30
+  timeStep: 0.1
   drawGrid: 0
   drawVelocities: 1
   drawVorticity: 0
-  drawParticles: 1
+  drawParticles: 0
   addObstacle: 0
-  resetParticlePositionAtBoundary: 1
-  solverIterations: 10
-  densitySourceRate: 10
-  velocitySourceRate: 5
-  diffusionRate: 0.01
-  viscocity: 0.01
-  vorticityMutiplier: 0.0001
-  particleVelocity: 100
+  resetParticlePositionAtBoundary: 0
+  solverIterations: 1
+  velocitySourceRate: 500
+  viscocity: 0.001
+  vorticityMutiplier: 0.001
+  particleVelocity: 0.1
   gridColor: {r: 1, g: 1, b: 1, a: 1}
   velocitiesColor: {r: 1, g: 0, b: 0, a: 1}
   particlesColor: {r: 1, g: 1, b: 1, a: 1}
-  particleGridSize: 25
+  particleGridSize: 40
 --- !u!1 &2101063364
 GameObject:
   m_ObjectHideFlags: 0
