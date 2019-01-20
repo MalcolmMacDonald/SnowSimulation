@@ -47,6 +47,13 @@ public partial class SimpleFluid : MonoBehaviour
     int particleCount;
 
 
+
+    public bool diffuse;
+    public bool advect;
+    public bool project;
+    public bool vorticity;
+
+
     // Use this for initialization
     void Start()
     {
@@ -61,14 +68,17 @@ public partial class SimpleFluid : MonoBehaviour
         previousMousePos.x = Mathf.Clamp(previousMousePos.x, 0, gridSize);
         previousMousePos.y = Mathf.Clamp(previousMousePos.y, 0, gridSize);
 
-        int particleCellSize = Mathf.FloorToInt(gridSize / (float)particleGridSize);
+        float particleCellSize = (gridSize) / (float)particleGridSize;
 
         for (int i = 0; i < particleGridSize; i++)
         {
             for (int j = 0; j < particleGridSize; j++)
             {
-                particles[j + (i * particleGridSize)] = ((Vector3)(Vector2.one / 2f) + new Vector3(i, j)) * particleCellSize;
+
+
+                particles[j + (i * particleGridSize)] = new Vector3(i + 1, j + 1) * particleCellSize;
                 particles[j + (i * particleGridSize)].z = 1;
+
             }
         }
     }
@@ -76,9 +86,10 @@ public partial class SimpleFluid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        ParticlesStep();
+
         VelocityStep();
 
-        ParticlesStep();
 
         if (drawGrid)
         {
@@ -99,23 +110,40 @@ public partial class SimpleFluid : MonoBehaviour
 
     void VelocityStep()
     {
+        SwapGrids(ref velocities, ref prevVelocities);
+
         AddVelocitySources();
 
-        SwapGrids(ref velocities, ref prevVelocities);
 
-        DiffuseVelocities(1, ref velocities, prevVelocities, viscocity, timeStep);
+        if (diffuse)
+        {
 
-        ProjectVelocities(ref velocities);
+            //
 
-        SwapGrids(ref velocities, ref prevVelocities);
+            DiffuseVelocities(ref velocities, prevVelocities, viscocity, timeStep);
+        }
+        if (project)
+        {
+            ProjectVelocities(ref velocities);
+        }
 
-        AdvectVelocities(1, ref velocities, prevVelocities, timeStep);
+        if (advect)
+        {
+            SwapGrids(ref velocities, ref prevVelocities);
 
-        SwapGrids(ref velocities, ref prevVelocities);
+            AdvectVelocities(ref velocities, prevVelocities, timeStep);
+            // SwapGrids(ref velocities, ref prevVelocities);
+        }
 
-        AddVorticity(vorticityMutiplier, ref velocities, prevVelocities);
+        if (vorticity)
+        {
+            AddVorticity(vorticityMutiplier, ref velocities, prevVelocities);
+        }
 
-        ProjectVelocities(ref velocities);
+        if (project)
+        {
+            ProjectVelocities(ref velocities);
+        }
     }
 
     void ParticlesStep()
@@ -130,9 +158,9 @@ public partial class SimpleFluid : MonoBehaviour
 
     void SwapGrids(ref Vector3[,,] a, ref Vector3[,,] b)
     {
-        Vector3[,,] temp = a;
-        a = b;
-        b = temp;
+        Vector3[,,] temp = (Vector3[,,])a.Clone();
+        a = (Vector3[,,])b.Clone();
+        b = (Vector3[,,])temp.Clone();
     }
 
 
@@ -145,18 +173,18 @@ public partial class SimpleFluid : MonoBehaviour
             {
                 for (int k = 0; k < gridSize + 2; k++)
                 {
-                    DrawCube(new Vector3(i, j, k) * cellSize, Vector3.one * cellSize / 2f, gridColor);
+                    DrawCube((new Vector3(i, j, k) + Vector3.one / 2f) * cellSize, Vector3.one * cellSize / 2f, gridColor);
                 }
             }
         }
     }
     void DrawVelocities()
     {
-        for (int i = 0; i < gridSize + 2; i++)
+        for (int i = 1; i <= gridSize; i++)
         {
-            for (int j = 0; j < gridSize + 2; j++)
+            for (int j = 1; j <= gridSize; j++)
             {
-                for (int k = 0; k < gridSize + 2; k++)
+                for (int k = 1; k <= gridSize; k++)
                 {
                     Debug.DrawRay(new Vector3(0.5f + i, 0.5f + j, 0.5f + k) * cellSize, Vector3.ClampMagnitude(velocities[i, j, k], cellSize), velocitiesColor);
                 }
@@ -218,18 +246,18 @@ public partial class SimpleFluid : MonoBehaviour
         float y = position.y;
         float z = position.z;
 
-        x = Mathf.Clamp(x, 0.5f, gridSize - 0.5f);
-        y = Mathf.Clamp(y, 0.5f, gridSize - 0.5f);
-        z = Mathf.Clamp(z, 0.5f, gridSize - 0.5f);
+        x = Mathf.Clamp(x, 0, gridSize);
+        y = Mathf.Clamp(y, 0, gridSize);
+        z = Mathf.Clamp(z, 0, gridSize);
 
-        int leftX = Mathf.RoundToInt(x);
+        int leftX = Mathf.FloorToInt(x);
         int rightX = leftX + 1;
 
-        int bottomY = Mathf.RoundToInt(y);
+        int bottomY = Mathf.FloorToInt(y);
         int topY = bottomY + 1;
 
-        int backZ = Mathf.RoundToInt(z);
-        int fromtZ = backZ + 1;
+        int backZ = Mathf.FloorToInt(z);
+        int frontZ = backZ + 1;
 
 
         float leftDistance = x - leftX;
@@ -239,12 +267,12 @@ public partial class SimpleFluid : MonoBehaviour
         float3 bottomLeftVel = velocities[leftX, bottomY, backZ];
         float3 bottomRightVel = velocities[rightX, bottomY, backZ];
         float3 topLeftVel = velocities[leftX, topY, backZ];
-        float3 topRightVel = velocities[leftX, topY, backZ];
+        float3 topRightVel = velocities[rightX, topY, backZ];
 
-        float3 bottomLeftFrontVel = velocities[leftX, bottomY, fromtZ];
-        float3 bottomRightFrontVel = velocities[rightX, bottomY, fromtZ];
-        float3 topLeftFrontVel = velocities[leftX, topY, fromtZ];
-        float3 topRightFrontVel = velocities[leftX, topY, fromtZ];
+        float3 bottomLeftFrontVel = velocities[leftX, bottomY, frontZ];
+        float3 bottomRightFrontVel = velocities[rightX, bottomY, frontZ];
+        float3 topLeftFrontVel = velocities[leftX, topY, frontZ];
+        float3 topRightFrontVel = velocities[rightX, topY, frontZ];
 
 
         float3 leftVelLerp = math.lerp(bottomLeftVel, topLeftVel, bottomDistance);

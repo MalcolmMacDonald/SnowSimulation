@@ -4,7 +4,7 @@ using UnityEngine;
 
 public partial class SimpleFluid
 {
-    void AdvectVelocities(int b, ref Vector3[,,] d, Vector3[,,] d0, float dt)
+    void AdvectVelocities(ref Vector3[,,] d, Vector3[,,] d0, float dt)
     {
         float dt0 = dt * gridSize;
 
@@ -15,12 +15,12 @@ public partial class SimpleFluid
                 for (int k = 1; k <= gridSize; k++)
                 {
 
-                    Vector3 newPos = dt0 * d[i, j, k];
+                    Vector3 newPos = new Vector3(i, j, k) - (dt0 * d0[i, j, k]);
                     d[i, j, k] = TrilinearInterpolation(newPos, d0);
                 }
             }
         }
 
-        SetVelocityBoundaries(b, ref d);
+        SetVelocityBoundaries(ref d);
     }
 }

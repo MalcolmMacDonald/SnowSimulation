@@ -5,13 +5,16 @@ using UnityEngine;
 public partial class SimpleFluid
 {
 
-    void DiffuseVelocities(int b, ref Vector3[,,] x, Vector3[,,] x0, float diff, float dt)
+    void DiffuseVelocities(ref Vector3[,,] x, Vector3[,,] x0, float diff, float dt)
     {
-        float a = dt * diff * gridSize * gridSize;
-        Vector3[,,] xCopy = x;
+        int gridSizeCubed = gridSize * gridSize * gridSize;
+        float a = diff; //* (float)gridSizeCubed;
+        float c = (1f + (6f * a));
+        Vector3[,,] xCopy = (Vector3[,,])x.Clone();
 
         for (int q = 0; q < solverIterations; q++)
         {
+
             for (int i = 1; i <= gridSize; i++)
             {
                 for (int j = 1; j <= gridSize; j++)
@@ -26,12 +29,12 @@ public partial class SimpleFluid
                         Vector3 prev4 = xCopy[i, j, k - 1];
                         Vector3 prev5 = xCopy[i, j, k + 1];
 
-                        x[i, j, k] = (thisPrev + a * (prev0 + prev1 + prev2 + prev3 + prev4 + prev5)) / (1 + 6 * a);
+                        x[i, j, k] = (thisPrev + (a * (prev0 + prev1 + prev2 + prev3 + prev4 + prev5))) / c;
                     }
                 }
             }
 
-            SetVelocityBoundaries(b, ref x);
+            SetVelocityBoundaries(ref x);
         }
     }
 }

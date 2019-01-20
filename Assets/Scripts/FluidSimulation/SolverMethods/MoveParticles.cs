@@ -15,13 +15,20 @@ public partial class SimpleFluid
                 if (newPos.x < 1 || newPos.x >= gridSize || newPos.y < 1 || newPos.y >= gridSize || newPos.z < 1 || newPos.z >= gridSize)
                 {
                     v[i] = Vector3.zero;
-                    newPos = new Vector3(UnityEngine.Random.Range(1f, gridSize), UnityEngine.Random.Range(1f, gridSize), 1);
+                    newPos = (Vector3)(new Vector2(Mathf.FloorToInt(i / particleGridSize) + 1, i % particleGridSize + 1) * gridSize / (float)particleGridSize) + Vector3.forward;
                 }
             }
             else
             {
-                newPos.x = Mathf.Clamp(newPos.x, 1, gridSize);
-                newPos.y = Mathf.Clamp(newPos.y, 1, gridSize);
+                if (newPos.x < 1 || newPos.x >= gridSize || newPos.y < 1 || newPos.y >= gridSize || newPos.z < 1 || newPos.z >= gridSize)
+                {
+                    newPos.x = Mathf.Clamp(newPos.x, 1, gridSize);
+                    newPos.y = Mathf.Clamp(newPos.y, 1, gridSize);
+                    newPos.z = Mathf.Clamp(newPos.z, 1, gridSize);
+                    v[i] = newPos - p[i];
+                }
+
+
             }
 
             particles[i] = newPos;

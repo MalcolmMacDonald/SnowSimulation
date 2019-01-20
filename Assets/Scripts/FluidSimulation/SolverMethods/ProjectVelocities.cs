@@ -7,7 +7,7 @@ public partial class SimpleFluid
 
     void ProjectVelocities(ref Vector3[,,] u)
     {
-        float h = 1f / gridSize;
+        float h = 1f / (float)gridSize;
         float[,,] pressure = new float[gridSize + 2, gridSize + 2, gridSize + 2];
         float[,,] divergence = new float[gridSize + 2, gridSize + 2, gridSize + 2];
 
@@ -17,19 +17,18 @@ public partial class SimpleFluid
             {
                 for (int k = 1; k <= gridSize; k++)
                 {
-                    float xDiv = u[i + 1, j, k].x - u[i - 1, j, k].x;
-                    float yDiv = u[i, j + 1, k].y - u[i, j - 1, k].y;
-                    float zDiv = u[i, j, k + 1].z - u[i, j, k - 1].z;
-                    divergence[i, j, k] = -0.5f * h * (xDiv + yDiv + zDiv);
+                    float xDiv = (u[i + 1, j, k].x - u[i - 1, j, k].x) / (float)gridSize;
+                    float yDiv = (u[i, j + 1, k].y - u[i, j - 1, k].y) / (float)gridSize;
+                    float zDiv = (u[i, j, k + 1].z - u[i, j, k - 1].z) / (float)gridSize;
+                    divergence[i, j, k] = -(1f / 3f) * (xDiv + yDiv + zDiv);
                 }
             }
         }
 
-        SetFloatBoundaries(0, ref divergence);
-        SetFloatBoundaries(0, ref pressure);
+        SetFloatBoundaries(ref divergence);
+        SetFloatBoundaries(ref pressure);
 
-        float[,,] pCopy = pressure;
-
+        //float[,,] pCopy = pressure;
         for (int q = 0; q < solverIterations; q++)
         {
             for (int i = 1; i <= gridSize; i++)
@@ -38,12 +37,21 @@ public partial class SimpleFluid
                 {
                     for (int k = 1; k <= gridSize; k++)
                     {
-                        pressure[i, j, k] = (divergence[i, j, k] + pCopy[i - 1, j, k] + pCopy[i + 1, j, k] + pCopy[i, j - 1, k] + pCopy[i, j + 1, k] + pCopy[i, j, k - 1] + pCopy[i, j, k + 1]) / 4f;
+                        pressure[i, j, k] =
+                        (
+                          divergence[i, j, k]
+                        + pressure[i - 1, j, k]
+                        + pressure[i + 1, j, k]
+                        + pressure[i, j - 1, k]
+                        + pressure[i, j + 1, k]
+                        + pressure[i, j, k - 1]
+                        + pressure[i, j, k + 1]
+                        ) / 6f;
                     }
                 }
             }
 
-            SetFloatBoundaries(0, ref pressure);
+            SetFloatBoundaries(ref pressure);
         }
 
         for (int i = 1; i <= gridSize; i++)
@@ -59,6 +67,6 @@ public partial class SimpleFluid
             }
         }
 
-        SetVelocityBoundaries(1, ref u);
+        SetVelocityBoundaries(ref u);
     }
 }
