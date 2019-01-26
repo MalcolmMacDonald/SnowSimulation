@@ -36,16 +36,36 @@ public partial class SimpleFluid
         mousePos.y = Mathf.Clamp(mousePos.y, 0, gridSize);
 
 
-        mousePos = new Vector2((gridSize + 2) / 2f, (gridSize + 2) / 2f);
+        //mousePos = new Vector2((gridSize + 2) / 2f, (gridSize + 2) / 2f);
         // mousePos += Vector2.one * 0.5f;
 
         Vector3 currentDir = Vector3.forward * velocitySourceRate;//(mousePos - previousMousePos) * velocitySourceRate;
 
-        // if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0))
         {
-            int centerIndex = ((gridSize + 2 - 1) / 2);
-            velocities[centerIndex, centerIndex, 1] += currentDir;
-            Debug.DrawRay((new Vector3(centerIndex, centerIndex, 0) + Vector3.one / 2f) * cellSize, -Vector3.forward);
+            int squareSize = (int)velocityInputRadius * 2;
+
+            for (int i = -squareSize / 2; i < squareSize / 2; i++)
+            {
+                for (int j = -squareSize / 2; j < squareSize / 2; j++)
+                {
+                    float distance = Mathf.Sqrt((float)((i * i) + (j * j)));
+                    if (distance < velocityInputRadius)
+                    {
+                        int x = (int)mousePos.x + 1 + i;
+                        int y = (int)mousePos.y + 1 + j;
+                        if (x > 0 && x < gridSize && y > 0 && y < gridSize)
+                        {
+                            float velocityFalloff = (1 - Mathf.Pow(distance / velocityInputRadius, 2));
+                            velocities[x, y, 1] += currentDir * velocityFalloff;
+
+                        }
+                    }
+
+                }
+            }
+
+            // Debug.DrawRay((new Vector3(centerIndex, centerIndex, 0) + Vector3.one / 2f) * cellSize, -Vector3.forward);
         }
 
         previousMousePos = mousePos;

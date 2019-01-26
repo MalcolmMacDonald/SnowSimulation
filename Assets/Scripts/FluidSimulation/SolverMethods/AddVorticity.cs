@@ -15,9 +15,9 @@ public partial class SimpleFluid
             {
                 for (int k = 1; k <= gridSize; k++)
                 {
-                    curl[i, j, k] = (1 / 3f) * new Vector3(prevU[i + 1, j, k].x - prevU[i - 1, j, k].x,
-                                                            prevU[i, j + 1, k].y - prevU[i, j - 1, k].y,
-                                                            prevU[i, j, k + 1].z - prevU[i, j, k - 1].z);
+                    curl[i, j, k] = (1f / 3f) * new Vector3(prevU[i + 1, j, k].x - prevU[i - 1, j, k].x,
+                                                           prevU[i, j + 1, k].y - prevU[i, j - 1, k].y,
+                                                           prevU[i, j, k + 1].z - prevU[i, j, k - 1].z);
                 }
             }
         }

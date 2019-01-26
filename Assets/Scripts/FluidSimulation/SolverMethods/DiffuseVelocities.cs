@@ -8,7 +8,7 @@ public partial class SimpleFluid
     void DiffuseVelocities(ref Vector3[,,] x, Vector3[,,] x0, float diff, float dt)
     {
         int gridSizeCubed = gridSize * gridSize * gridSize;
-        float a = diff; //* (float)gridSizeCubed;
+        float a = dt * diff * (float)gridSizeCubed;
         float c = (1f + (6f * a));
         Vector3[,,] xCopy = (Vector3[,,])x.Clone();
 

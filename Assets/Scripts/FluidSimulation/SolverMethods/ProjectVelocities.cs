@@ -27,10 +27,11 @@ public partial class SimpleFluid
 
         SetFloatBoundaries(ref divergence);
         SetFloatBoundaries(ref pressure);
+        float[,,] pCopy = (float[,,])pressure.Clone();
 
-        //float[,,] pCopy = pressure;
         for (int q = 0; q < solverIterations; q++)
         {
+
             for (int i = 1; i <= gridSize; i++)
             {
                 for (int j = 1; j <= gridSize; j++)
@@ -40,12 +41,12 @@ public partial class SimpleFluid
                         pressure[i, j, k] =
                         (
                           divergence[i, j, k]
-                        + pressure[i - 1, j, k]
-                        + pressure[i + 1, j, k]
-                        + pressure[i, j - 1, k]
-                        + pressure[i, j + 1, k]
-                        + pressure[i, j, k - 1]
-                        + pressure[i, j, k + 1]
+                        + pCopy[i - 1, j, k]
+                        + pCopy[i + 1, j, k]
+                        + pCopy[i, j - 1, k]
+                        + pCopy[i, j + 1, k]
+                        + pCopy[i, j, k - 1]
+                        + pCopy[i, j, k + 1]
                         ) / 6f;
                     }
                 }
