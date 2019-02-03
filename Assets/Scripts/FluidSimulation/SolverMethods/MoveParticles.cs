@@ -12,22 +12,20 @@ public partial class SimpleFluid
 
             if (resetParticlePositionAtBoundary)
             {
-                if (newPos.x < 0 || newPos.x >= gridSize + 1 || newPos.y < 0 || newPos.y >= gridSize + 1 || newPos.z < 0 || newPos.z >= gridSize + 1)
+                if (newPos.x < 0 || newPos.x >= gridSizeX + 1 || newPos.y < 0 || newPos.y >= gridSizeY + 1 || newPos.z < 0 || newPos.z >= gridSizeZ + 1)
                 {
                     v[i] = Vector3.zero;
-                    float particleCellSize = gridSize / (float)particleGridSize;
-                    int yPos = Mathf.FloorToInt((float)i / (float)particleGridSize);
-                    int xPos = (i % particleGridSize);
-                    newPos = new Vector3(xPos + 1.5f, yPos + 1.5f) * particleCellSize + Vector3.forward;
+                    Vector3 particleCellSize = new Vector3(gridSizeX / (float)particleGridSize, gridSizeY / (float)particleGridSize, gridSizeZ / (float)particleGridSize);
+                    newPos = new Vector3(UnityEngine.Random.Range(1, gridSizeX + 1), UnityEngine.Random.Range(1, gridSizeY + 1), UnityEngine.Random.Range(1, gridSizeZ + 1));
                 }
             }
             else
             {
-                if (newPos.x < 1 || newPos.x >= gridSize + 1 || newPos.y < 1 || newPos.y >= gridSize + 1 || newPos.z < 1 || newPos.z >= gridSize + 1)
+                if (newPos.x < 1 || newPos.x >= gridSizeX + 1 || newPos.y < 1 || newPos.y >= gridSizeY + 1 || newPos.z < 1 || newPos.z >= gridSizeZ + 1)
                 {
-                    newPos.x = Mathf.Clamp(newPos.x, 1, gridSize + 1);
-                    newPos.y = Mathf.Clamp(newPos.y, 1, gridSize + 1);
-                    newPos.z = Mathf.Clamp(newPos.z, 1, gridSize + 1);
+                    newPos.x = Mathf.Clamp(newPos.x, 1, gridSizeX + 1);
+                    newPos.y = Mathf.Clamp(newPos.y, 1, gridSizeY + 1);
+                    newPos.z = Mathf.Clamp(newPos.z, 1, gridSizeZ + 1);
                     v[i] = newPos - p[i];
                 }
 

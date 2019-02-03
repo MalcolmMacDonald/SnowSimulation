@@ -15,6 +15,11 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         rotationInput = new Vector2();
+
+        SimpleFluid fluid = FindObjectOfType<SimpleFluid>();
+        float minFluidGridSize = Mathf.Min(fluid.gridSizeX, fluid.gridSizeY, fluid.gridSizeZ);
+        transform.position = new Vector3(fluid.gridSizeX / minFluidGridSize, fluid.gridSizeY / minFluidGridSize, fluid.gridSizeZ / minFluidGridSize) / 2f;
+        transform.GetChild(0).localPosition = Vector3.back * 12f;
     }
 
     // Update is called once per frame

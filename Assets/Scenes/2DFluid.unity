@@ -146,7 +146,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215688, g: 0.19215688, b: 0.19215688, a: 0}
+  m_BackGroundColor: {r: 0.11320752, g: 0.111605525, b: 0.111605525, a: 0}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
@@ -468,24 +468,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67b00f3119528cb459e07d2f345bb341, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSize: 18
+  gridSizeX: 10
+  gridSizeY: 10
+  gridSizeZ: 30
   timeStep: 0.02
   drawGrid: 0
+  drawBoundingBox: 1
   drawVelocities: 0
   drawVorticity: 0
   drawParticles: 0
   drawParticleMesh: 1
   addObstacle: 0
-  resetParticlePositionAtBoundary: 0
-  solverIterations: 10
-  velocitySourceRate: 10
+  resetParticlePositionAtBoundary: 1
+  solverIterations: 4
+  velocitySourceRate: 3
   viscocity: 500
   vorticityMutiplier: 0.1
-  particleVelocity: 15
-  gridColor: {r: 1, g: 1, b: 1, a: 1}
+  particleVelocity: 30
+  gridColor: {r: 0.03773582, g: 0.03773582, b: 0.03773582, a: 0.56078434}
   velocitiesColor: {r: 1, g: 0, b: 0, a: 1}
   particlesColor: {r: 0, g: 0.8396226, b: 0.7443386, a: 1}
-  particleGridSize: 72
+  particleGridSize: 50
   velocityInputRadius: 5
   diffuse: 1
   advect: 1

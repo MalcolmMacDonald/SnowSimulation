@@ -7,13 +7,13 @@ public partial class SimpleFluid
 
     void AddVorticity(float multiplier, ref Vector3[,,] u, Vector3[,,] prevU)
     {
-        Vector3[,,] curl = new Vector3[gridSize + 2, gridSize + 2, gridSize + 2];
+        Vector3[,,] curl = new Vector3[gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2];
 
-        for (int i = 1; i <= gridSize; i++)
+        for (int i = 1; i <= gridSizeX; i++)
         {
-            for (int j = 1; j <= gridSize; j++)
+            for (int j = 1; j <= gridSizeY; j++)
             {
-                for (int k = 1; k <= gridSize; k++)
+                for (int k = 1; k <= gridSizeZ; k++)
                 {
                     curl[i, j, k] = (1f / 3f) * new Vector3(prevU[i + 1, j, k].x - prevU[i - 1, j, k].x,
                                                            prevU[i, j + 1, k].y - prevU[i, j - 1, k].y,
@@ -23,11 +23,11 @@ public partial class SimpleFluid
         }
         SetVelocityBoundaries(ref curl);
 
-        for (int i = 1; i <= gridSize; i++)
+        for (int i = 1; i <= gridSizeX; i++)
         {
-            for (int j = 1; j <= gridSize; j++)
+            for (int j = 1; j <= gridSizeY; j++)
             {
-                for (int k = 1; k <= gridSize; k++)
+                for (int k = 1; k <= gridSizeZ; k++)
                 {
                     float dwdx = 0.5f * (curl[i + 1, j, k].x - curl[i - 1, j, k].x);
                     float dwdy = 0.5f * (curl[i, j + 1, k].y - curl[i, j - 1, k].y);

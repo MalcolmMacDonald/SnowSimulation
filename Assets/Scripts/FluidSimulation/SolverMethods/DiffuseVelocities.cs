@@ -7,7 +7,7 @@ public partial class SimpleFluid
 
     void DiffuseVelocities(ref Vector3[,,] x, Vector3[,,] x0, float diff, float dt)
     {
-        int gridSizeCubed = gridSize * gridSize * gridSize;
+        int gridSizeCubed = gridSizeX * gridSizeY * gridSizeZ;
         float a = dt * diff * (float)gridSizeCubed;
         float c = (1f + (6f * a));
         Vector3[,,] xCopy = (Vector3[,,])x.Clone();
@@ -15,11 +15,11 @@ public partial class SimpleFluid
         for (int q = 0; q < solverIterations; q++)
         {
 
-            for (int i = 1; i <= gridSize; i++)
+            for (int i = 1; i <= gridSizeX; i++)
             {
-                for (int j = 1; j <= gridSize; j++)
+                for (int j = 1; j <= gridSizeY; j++)
                 {
-                    for (int k = 1; k <= gridSize; k++)
+                    for (int k = 1; k <= gridSizeZ; k++)
                     {
                         Vector3 thisPrev = x0[i, j, k];
                         Vector3 prev0 = xCopy[i - 1, j, k];
