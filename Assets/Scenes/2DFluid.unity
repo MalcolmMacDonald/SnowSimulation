@@ -469,22 +469,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellSize: {x: 0, y: 0, z: 0}
-  gridSizeX: 20
-  gridSizeY: 20
-  gridSizeZ: 10
+  gridSizeX: 10
+  gridSizeY: 10
+  gridSizeZ: 25
   timeStep: 0.02
   drawGrid: 0
   drawBoundingBox: 1
-  drawVelocities: 1
-  drawVorticity: 0
+  drawVelocities: 0
   drawParticles: 0
-  drawParticleVelocities: 0
+  drawParticleVelocities: 1
   addObstacle: 0
   resetParticlePositionAtBoundary: 1
   solverIterations: 4
   velocitySourceRate: 3
   viscocity: 500
-  vorticityMutiplier: 0.01
   particleVelocity: 30
   gridColor: {r: 1, g: 1, b: 1, a: 1}
   velocitiesColor: {r: 1, g: 0, b: 0, a: 1}

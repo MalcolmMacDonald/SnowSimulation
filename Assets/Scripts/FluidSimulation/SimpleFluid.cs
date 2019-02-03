@@ -22,6 +22,10 @@ public partial class SimpleFluid : MonoBehaviour
     Vector3[,,] velocities;
     Vector3[,,] prevVelocities;
 
+    Vector3Int[,,] boundaryOffsets;
+
+
+
     public bool drawGrid;
     public bool drawBoundingBox;
     public bool drawVelocities;
@@ -60,6 +64,8 @@ public partial class SimpleFluid : MonoBehaviour
     public bool vorticity;
 
 
+    Bounds gridBounds;
+
     // Use this for initialization
     void Start()
     {
@@ -75,7 +81,8 @@ public partial class SimpleFluid : MonoBehaviour
         particleVelocities = new Vector3[particleCount];
         velocities = new Vector3[gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2];
         prevVelocities = new Vector3[gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2];
-
+        boundaryOffsets = new Vector3Int[gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2];
+        SetBoundaryOffsets();
         Vector2 previousMousePos = Camera.main.ScreenToViewportPoint(Input.mousePosition);
         previousMousePos.x = Mathf.Clamp(previousMousePos.x, 0, 1f) * gridSizeX;
         previousMousePos.y = Mathf.Clamp(previousMousePos.y, 0, 1f) * gridSizeY;
@@ -89,6 +96,7 @@ public partial class SimpleFluid : MonoBehaviour
                 particles[i + (j * particleGridSize)] = new Vector3(UnityEngine.Random.Range(1, gridSizeX + 1), UnityEngine.Random.Range(1, gridSizeY + 1), UnityEngine.Random.Range(1, gridSizeZ + 1));
             }
         }
+        gridBounds = new Bounds(Vector3.Scale(cellSize, new Vector3(gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2) / 2f), Vector3.Scale(cellSize, new Vector3(gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2)));
     }
 
     // Update is called once per frame
@@ -236,7 +244,13 @@ public partial class SimpleFluid : MonoBehaviour
         for (int i = 0; i < particleCount; i++)
         {
             Vector3 remappedVelocity = Vector3.ClampMagnitude(particleVelocities[i] * timeStep, cellSize.magnitude);
-            Debug.DrawRay(Vector3.Scale(particles[i], cellSize), remappedVelocity, particlesColor);
+
+            Vector3 velocityPosition = Vector3.Scale(particles[i], cellSize) + remappedVelocity;
+            if (!gridBounds.Contains(velocityPosition))
+            {
+                velocityPosition = gridBounds.ClosestPoint(velocityPosition);
+            }
+            Debug.DrawLine(Vector3.Scale(particles[i], cellSize), velocityPosition, particlesColor);
         }
 
     }

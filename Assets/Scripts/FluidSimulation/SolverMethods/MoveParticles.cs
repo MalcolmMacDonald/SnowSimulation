@@ -16,7 +16,7 @@ public partial class SimpleFluid
                 {
                     v[i] = Vector3.zero;
                     Vector3 particleCellSize = new Vector3(gridSizeX / (float)particleGridSize, gridSizeY / (float)particleGridSize, gridSizeZ / (float)particleGridSize);
-                    newPos = new Vector3(UnityEngine.Random.Range(1, gridSizeX + 1), UnityEngine.Random.Range(1, gridSizeY + 1), UnityEngine.Random.Range(1, gridSizeZ + 1));
+                    newPos = new Vector3(UnityEngine.Random.Range(1, gridSizeX + 1f), UnityEngine.Random.Range(1, gridSizeY + 1f), UnityEngine.Random.Range(1, gridSizeZ + 1f));
                 }
             }
             else

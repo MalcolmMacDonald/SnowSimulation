@@ -4,7 +4,7 @@ using UnityEngine;
 
 public partial class SimpleFluid
 {
-    void SetVelocityBoundaries(ref Vector3[,,] x)
+    void SetBoundaryOffsets()
     {
         int edgeValue = 0;
         for (int i = 1; i < gridSizeY + 1; i++)
@@ -12,9 +12,9 @@ public partial class SimpleFluid
             for (int j = 1; j < gridSizeZ + 1; j++)
             {
                 edgeValue = 0;
-                x[edgeValue, i, j].x = -x[edgeValue + 1, i, j].x;
+                boundaryOffsets[edgeValue, i, j].x = 1;
                 edgeValue = gridSizeX + 1;
-                x[edgeValue, i, j].x = -x[edgeValue - 1, i, j].x;
+                boundaryOffsets[edgeValue, i, j].x = -1;
 
             }
         }
@@ -23,9 +23,9 @@ public partial class SimpleFluid
             for (int j = 1; j < gridSizeZ + 1; j++)
             {
                 edgeValue = 0;
-                x[i, edgeValue, j].y = -x[i, edgeValue + 1, j].y;
+                boundaryOffsets[i, edgeValue, j].y = 1;
                 edgeValue = gridSizeY + 1;
-                x[i, edgeValue, j].y = -x[i, edgeValue - 1, j].y;
+                boundaryOffsets[i, edgeValue, j].y = -1;
             }
         }
         for (int i = 1; i < gridSizeX + 1; i++)
@@ -33,52 +33,46 @@ public partial class SimpleFluid
             for (int j = 1; j < gridSizeY + 1; j++)
             {
                 edgeValue = 0;
-                x[i, j, edgeValue].z = -x[i, j, edgeValue + 1].z;
+                boundaryOffsets[i, j, edgeValue].z = 1;
                 edgeValue = gridSizeZ + 1;
-                x[i, j, edgeValue].z = -x[i, j, edgeValue - 1].z;
+                boundaryOffsets[i, j, edgeValue].z = -1;
             }
         }
+    }
 
 
+    void SetVelocityBoundaries(ref Vector3[,,] x)
+    {
+        for (int i = 0; i < gridSizeX + 2; i++)
+        {
+            for (int j = 0; j < gridSizeY + 2; j++)
+            {
+                for (int k = 0; k < gridSizeZ + 2; k++)
+                {
+                    if (boundaryOffsets[i, j, k] != Vector3.zero)
+                    {
+                        x[i, j, k] = -x[i + boundaryOffsets[i, j, k].x, j + boundaryOffsets[i, j, k].y, k + boundaryOffsets[i, j, k].z];
+                    }
+                }
+            }
+        }
     }
 
 
     void SetFloatBoundaries(ref float[,,] x)
     {
-        int edgeValue;
-        for (int i = 1; i < gridSizeY + 1; i++)
+        for (int i = 0; i < gridSizeX + 2; i++)
         {
-            for (int j = 1; j < gridSizeZ + 1; j++)
+            for (int j = 0; j < gridSizeY + 2; j++)
             {
-                edgeValue = 0;
-                x[edgeValue, i, j] = -x[edgeValue + 1, i, j];
-                edgeValue = gridSizeX + 1;
-                x[edgeValue, i, j] = -x[edgeValue - 1, i, j];
-
+                for (int k = 0; k < gridSizeZ + 2; k++)
+                {
+                    if (boundaryOffsets[i, j, k] != Vector3.zero)
+                    {
+                        x[i, j, k] = -x[i + boundaryOffsets[i, j, k].x, j + boundaryOffsets[i, j, k].y, k + boundaryOffsets[i, j, k].z];
+                    }
+                }
             }
         }
-        for (int i = 1; i < gridSizeX + 1; i++)
-        {
-            for (int j = 1; j < gridSizeZ + 1; j++)
-            {
-
-                edgeValue = 0;
-                x[i, edgeValue, j] = -x[i, edgeValue + 1, j];
-                edgeValue = gridSizeY + 1;
-                x[i, edgeValue, j] = -x[i, edgeValue - 1, j];
-            }
-        }
-        for (int i = 1; i < gridSizeX + 1; i++)
-        {
-            for (int j = 1; j < gridSizeY + 1; j++)
-            {
-                edgeValue = 0;
-                x[i, j, edgeValue] = -x[i, j, edgeValue + 1];
-                edgeValue = gridSizeZ + 1;
-                x[i, j, edgeValue] = -x[i, j, edgeValue - 1];
-
-            }
-        }
-
     }
 }
