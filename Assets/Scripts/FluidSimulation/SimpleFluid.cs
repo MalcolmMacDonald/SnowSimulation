@@ -7,7 +7,8 @@ using System.Linq;
 public partial class SimpleFluid : MonoBehaviour
 {
     Vector3 gridScale;
-    Vector3 cellSize;
+    [HideInInspector]
+    public Vector3 cellSize;
 
     public int gridSizeX;
     public int gridSizeY;
@@ -69,10 +70,10 @@ public partial class SimpleFluid : MonoBehaviour
 
 
 
-        float minValue = Mathf.Min(gridSizeX, gridSizeY, gridSizeZ);
-        gridScale = new Vector3(gridSizeX / minValue, gridSizeY / minValue, gridSizeZ / minValue);
+        float maxValue = Mathf.Max(gridSizeX, gridSizeY, gridSizeZ);
+        gridScale = new Vector3(gridSizeX / maxValue, gridSizeY / maxValue, gridSizeZ / maxValue);
 
-        cellSize = new Vector3(gridScale.x / (gridSizeX + 2), gridScale.x / (gridSizeY + 2), gridScale.z / (gridSizeZ + 2));
+        cellSize = new Vector3(gridScale.x / (gridSizeX + 2), gridScale.y / (gridSizeY + 2), gridScale.z / (gridSizeZ + 2));
         particleCount = particleGridSize * particleGridSize;
         particles = new Vector3[particleCount];
         particleVelocities = new Vector3[particleCount];

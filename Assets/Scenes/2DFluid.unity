@@ -468,9 +468,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67b00f3119528cb459e07d2f345bb341, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSizeX: 10
-  gridSizeY: 10
-  gridSizeZ: 30
+  cellSize: {x: 0, y: 0, z: 0}
+  gridSizeX: 20
+  gridSizeY: 20
+  gridSizeZ: 10
   timeStep: 0.02
   drawGrid: 0
   drawBoundingBox: 1
@@ -485,7 +486,7 @@ MonoBehaviour:
   viscocity: 500
   vorticityMutiplier: 0.1
   particleVelocity: 30
-  gridColor: {r: 0.03773582, g: 0.03773582, b: 0.03773582, a: 0.56078434}
+  gridColor: {r: 1, g: 1, b: 1, a: 1}
   velocitiesColor: {r: 1, g: 0, b: 0, a: 1}
   particlesColor: {r: 0, g: 0.8396226, b: 0.7443386, a: 1}
   particleGridSize: 50
