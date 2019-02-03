@@ -33,11 +33,6 @@ public class CameraController : MonoBehaviour
             rotationVelocity.y = Input.GetAxis("Mouse Y") * -sensitivity;
         }
 
-        if (rotationInput.magnitude > maxRotationDistance)
-        {
-            //      rotationVelocity -= (rotationInput.normalized * (rotationInput.magnitude - maxRotationDistance)) * returnSpeed;
-        }
-
         rotationInput += rotationVelocity;
 
         destinationRotation = Quaternion.AngleAxis(rotationInput.x, Vector3.up) * Quaternion.AngleAxis(rotationInput.y, Vector3.right);

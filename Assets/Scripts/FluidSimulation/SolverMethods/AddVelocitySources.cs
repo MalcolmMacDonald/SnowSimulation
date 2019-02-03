@@ -51,8 +51,6 @@ public partial class SimpleFluid
             }
         }
 
-        //    Debug.DrawRay(mousePos, singleComponentDirection);
-
         mousePos.x /= gridScale.x;
         mousePos.y /= gridScale.y;
         mousePos.z /= gridScale.z;
@@ -65,7 +63,6 @@ public partial class SimpleFluid
             int x = Mathf.FloorToInt(mousePos.x * gridSizeX) + 1;
             int y = Mathf.FloorToInt(mousePos.y * gridSizeY) + 1;
             int z = Mathf.FloorToInt(mousePos.z * gridSizeZ) + 1;
-            //  velocities[x, y, z] += singleComponentDirection * velocitySourceRate;
 
             for (int i = -squareSize / 2; i < squareSize / 2; i++)
             {
@@ -107,35 +104,5 @@ public partial class SimpleFluid
             }
 
         }
-
-
-
-        /* if (Input.GetMouseButton(0))
-        {
-            int squareSize = (int)velocityInputRadius * 2;
-
-            for (int i = -squareSize / 2; i < squareSize / 2; i++)
-            {
-                for (int j = -squareSize / 2; j < squareSize / 2; j++)
-                {
-                    float distance = Mathf.Sqrt((float)((i * i) + (j * j)));
-                    if (distance < velocityInputRadius)
-                    {
-                        int x = (int)mousePos.x + 1 + i;
-                        int y = (int)mousePos.y + 1 + j;
-                        if (x > 0 && x < gridSizeX && y > 0 && y < gridSizeY)
-                        {
-                            float velocityFalloff = (1 - Mathf.Pow(distance / velocityInputRadius, 2));
-                            velocities[x, y, 1] += currentDir * velocityFalloff;
-
-                        }
-                    }
-
-                }
-            }
-
-        }*/
-
-        //   previousMousePos = mousePos;
     }
 }

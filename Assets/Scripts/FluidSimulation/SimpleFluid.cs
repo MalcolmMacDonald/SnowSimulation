@@ -19,17 +19,14 @@ public partial class SimpleFluid : MonoBehaviour
     public float timeStep = 0.1f;
 
 
-
-
     Vector3[,,] velocities;
     Vector3[,,] prevVelocities;
 
     public bool drawGrid;
     public bool drawBoundingBox;
     public bool drawVelocities;
-    public bool drawVorticity;
     public bool drawParticles;
-    public bool drawParticleMesh;
+    public bool drawParticleVelocities;
 
 
     public bool addObstacle;
@@ -38,7 +35,6 @@ public partial class SimpleFluid : MonoBehaviour
     public int solverIterations;
     public float velocitySourceRate;
     public float viscocity;
-    public float vorticityMutiplier;
     public float particleVelocity;
 
 
@@ -90,10 +86,6 @@ public partial class SimpleFluid : MonoBehaviour
         {
             for (int j = 0; j < particleGridSize; j++)
             {
-
-
-                // particles[i + (j * particleGridSize)] = new Vector3((i + 1) * particleCellSize.x, (j + 1) * particleCellSize.y);
-                // particles[i + (j * particleGridSize)].z = 1;
                 particles[i + (j * particleGridSize)] = new Vector3(UnityEngine.Random.Range(1, gridSizeX + 1), UnityEngine.Random.Range(1, gridSizeY + 1), UnityEngine.Random.Range(1, gridSizeZ + 1));
             }
         }
@@ -108,25 +100,6 @@ public partial class SimpleFluid : MonoBehaviour
         VelocityStep();
 
         ParticlesStep();
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            for (int i = 0; i < particleGridSize; i++)
-            {
-                for (int j = 0; j < particleGridSize; j++)
-                {
-                    particles[i + (j * particleGridSize)] = new Vector3(UnityEngine.Random.Range(1, gridSizeX + 1), UnityEngine.Random.Range(1, gridSizeY + 1), UnityEngine.Random.Range(1, gridSizeZ + 1));
-
-                    particleVelocities[i] = Vector3.zero;
-
-                    //   Vector3 particleCellSize = new Vector3(gridSizeX / (float)particleGridSize, gridSizeY / (float)particleGridSize, gridSizeZ / (float)particleGridSize);
-
-                    //   particles[i + (j * particleGridSize)] = new Vector3((i + 1) * particleCellSize.x, (j + 1) * particleCellSize.y);
-                    //   particles[i + (j * particleGridSize)].z = 1;
-
-                }
-            }
-        }
 
         if (drawGrid)
         {
@@ -146,9 +119,9 @@ public partial class SimpleFluid : MonoBehaviour
         {
             DrawParticles();
         }
-        if (drawParticleMesh)
+        if (drawParticleVelocities)
         {
-            DrawParticleMesh();
+            DrawParticleVelocities();
         }
     }
 
@@ -157,7 +130,6 @@ public partial class SimpleFluid : MonoBehaviour
     {
 
         prevVelocities = (Vector3[,,])velocities.Clone();
-        //velocities = new Vector3[gridSize + 2, gridSize + 2, gridSize + 2];
 
         AddVelocitySources();
 
@@ -179,14 +151,6 @@ public partial class SimpleFluid : MonoBehaviour
             SwapGrids(ref velocities, ref prevVelocities);
 
             AdvectVelocities(ref velocities, prevVelocities, timeStep);
-
-        }
-
-        if (vorticity)
-        {
-            //            SwapGrids(ref velocities, ref prevVelocities);
-
-            AddVorticity(vorticityMutiplier, ref velocities, prevVelocities);
 
         }
 
@@ -266,52 +230,9 @@ public partial class SimpleFluid : MonoBehaviour
             DrawCube(particlePos, cellSize * 0.1f, particlesColor);
         }
     }
-    void DrawParticleMesh()
+    void DrawParticleVelocities()
     {
-        //grid mesh
-        /*    int index = 0;
-           Vector3 particlePos = Vector3.zero;
-           Vector3 nextParticlePos = Vector3.zero;
-           for (int i = 0; i < particleGridSize - 1; i++)
-           {
-               for (int j = 0; j < particleGridSize - 1; j++)
-               {
-                   index = (i * particleGridSize) + j;
-                   particlePos = Vector3.Scale(new Vector3(0.5f + particles[index].x, 0.5f + particles[index].y, 0.5f + particles[index].z), cellSize);
-                   index = (i * particleGridSize) + j + 1;
-                   nextParticlePos = Vector3.Scale(new Vector3(0.5f + particles[index].x, 0.5f + particles[index].y, 0.5f + particles[index].z), cellSize);
-                   Debug.DrawLine(particlePos, nextParticlePos, particlesColor);
 
-
-                   index = (i * particleGridSize) + j;
-                   particlePos = Vector3.Scale(new Vector3(0.5f + particles[index].x, 0.5f + particles[index].y, 0.5f + particles[index].z), cellSize);
-                   index = ((i + 1) * particleGridSize) + j;
-                   nextParticlePos = Vector3.Scale(new Vector3(0.5f + particles[index].x, 0.5f + particles[index].y, 0.5f + particles[index].z), cellSize);
-
-                   Debug.DrawLine(particlePos, nextParticlePos, particlesColor);
-               }
-           }
-
-           for (int i = 0; i < particleGridSize - 1; i++)
-           {
-               index = (particleGridSize * (particleGridSize - 1)) + i;
-               particlePos = Vector3.Scale(new Vector3(0.5f + particles[index].x, 0.5f + particles[index].y, 0.5f + particles[index].z), cellSize);
-               index = (particleGridSize * (particleGridSize - 1)) + i + 1;
-               nextParticlePos = Vector3.Scale(new Vector3(0.5f + particles[index].x, 0.5f + particles[index].y, 0.5f + particles[index].z), cellSize);
-               Debug.DrawLine(particlePos, nextParticlePos, particlesColor);
-
-
-
-               index = (i * particleGridSize) + particleGridSize - 1;
-               particlePos = Vector3.Scale(new Vector3(0.5f + particles[index].x, 0.5f + particles[index].y, 0.5f + particles[index].z), cellSize);
-               index = ((i + 1) * particleGridSize) + particleGridSize - 1;
-               nextParticlePos = Vector3.Scale(new Vector3(0.5f + particles[index].x, 0.5f + particles[index].y, 0.5f + particles[index].z), cellSize);
-
-               Debug.DrawLine(particlePos, nextParticlePos, particlesColor);
-           }
-   */
-
-        //neighbor mesh
         for (int i = 0; i < particleCount; i++)
         {
             Vector3 remappedVelocity = Vector3.ClampMagnitude(particleVelocities[i] * timeStep, cellSize.magnitude);

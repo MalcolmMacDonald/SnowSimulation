@@ -475,16 +475,16 @@ MonoBehaviour:
   timeStep: 0.02
   drawGrid: 0
   drawBoundingBox: 1
-  drawVelocities: 0
+  drawVelocities: 1
   drawVorticity: 0
   drawParticles: 0
-  drawParticleMesh: 1
+  drawParticleVelocities: 0
   addObstacle: 0
   resetParticlePositionAtBoundary: 1
   solverIterations: 4
   velocitySourceRate: 3
   viscocity: 500
-  vorticityMutiplier: 0.1
+  vorticityMutiplier: 0.01
   particleVelocity: 30
   gridColor: {r: 1, g: 1, b: 1, a: 1}
   velocitiesColor: {r: 1, g: 0, b: 0, a: 1}
@@ -494,7 +494,7 @@ MonoBehaviour:
   diffuse: 1
   advect: 1
   project: 1
-  vorticity: 0
+  vorticity: 1
 --- !u!1 &2101063364
 GameObject:
   m_ObjectHideFlags: 0
