@@ -96,7 +96,7 @@ public partial class SimpleFluid
                         {
                             float velocityFalloff = (1 - Mathf.Pow(distance / velocityInputRadius, 2));
 
-                            velocities[x, y, z] += singleComponentDirection * velocitySourceRate;
+                            velocities[ArrayIndex(x, y, z)] += singleComponentDirection * velocitySourceRate;
                         }
                     }
                 }

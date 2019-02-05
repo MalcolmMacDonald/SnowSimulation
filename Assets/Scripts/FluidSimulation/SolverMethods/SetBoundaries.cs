@@ -15,7 +15,7 @@ public partial class SimpleFluid
             {
                 for (int k = 0; k < gridSizeZ + 2; k++)
                 {
-                    collisionGrid[i, j, k] = Physics.CheckBox(Vector3.Scale(new Vector3(0.5f + i, 0.5f + j, 0.5f + k), cellSize), cellSize / 2f);
+                    collisionGrid[ArrayIndex(i, j, k)] = Physics.CheckBox(Vector3.Scale(new Vector3(0.5f + i, 0.5f + j, 0.5f + k), cellSize), cellSize / 2f);
                 }
             }
         }
@@ -27,13 +27,13 @@ public partial class SimpleFluid
                 {
                     if (!(i > 0 && i < gridSizeX + 1 && j > 0 && j < gridSizeY + 1 && k > 0 && k < gridSizeZ + 1))
                     {
-                        boundaryOffsets[i, j, k] = GetSampledNormal(i, j, k, collisionGrid);
+                        boundaryOffsets[ArrayIndex(i, j, k)] = GetSampledNormal(i, j, k, collisionGrid);
                     }
                     else
                     {
-                        if (collisionGrid[i, j, k])
+                        if (collisionGrid[ArrayIndex(i, j, k)])
                         {
-                            boundaryOffsets[i, j, k] = GetSampledNormal(i, j, k, collisionGrid);
+                            boundaryOffsets[ArrayIndex(i, j, k)] = GetSampledNormal(i, j, k, collisionGrid);
                         }
                     }
                 }
@@ -41,11 +41,10 @@ public partial class SimpleFluid
         }
     }
 
-    Vector3Int GetSampledNormal(int x, int y, int z, bool[,,] grid)
+    Vector3Int GetSampledNormal(int x, int y, int z, bool[] grid)
     {
         Vector3 foundNormal = new Vector3();
         int newX, newY, newZ;
-        int foundCellsCount = 0;
         for (int i = -1; i < 2; i++)
         {
             for (int j = -1; j < 2; j++)
@@ -61,13 +60,11 @@ public partial class SimpleFluid
                         if (!(newX >= 0 && newX < gridSizeX + 2 && newY >= 0 && newY < gridSizeY + 2 && newZ >= 0 && newZ < gridSizeZ + 2))
                         {
                             foundNormal -= new Vector3(i, j, k);
-                            foundCellsCount++;
                             continue;
                         }
-                        if (grid[newX, newY, newZ])
+                        if (grid[ArrayIndex(newX, newY, newZ)])
                         {
                             foundNormal -= new Vector3(i, j, k);
-                            foundCellsCount++;
                         }
 
                     }
@@ -80,17 +77,18 @@ public partial class SimpleFluid
     }
 
 
-    void SetVelocityBoundaries(ref Vector3[,,] x)
+    void SetVelocityBoundaries(ref Vector3[] x)
     {
+        Vector3[] xCopy = (Vector3[])x.Clone();
         for (int i = 0; i < gridSizeX + 2; i++)
         {
             for (int j = 0; j < gridSizeY + 2; j++)
             {
                 for (int k = 0; k < gridSizeZ + 2; k++)
                 {
-                    if (boundaryOffsets[i, j, k] != Vector3.zero)
+                    if (boundaryOffsets[ArrayIndex(i, j, k)] != Vector3.zero)
                     {
-                        x[i, j, k] = -x[i + boundaryOffsets[i, j, k].x, j + boundaryOffsets[i, j, k].y, k + boundaryOffsets[i, j, k].z];
+                        x[ArrayIndex(i, j, k)] = -xCopy[ArrayIndex(i + boundaryOffsets[ArrayIndex(i, j, k)].x, j + boundaryOffsets[ArrayIndex(i, j, k)].y, k + boundaryOffsets[ArrayIndex(i, j, k)].z)];
                     }
                 }
             }
@@ -98,17 +96,18 @@ public partial class SimpleFluid
     }
 
 
-    void SetFloatBoundaries(ref float[,,] x)
+    void SetFloatBoundaries(ref float[] x)
     {
+        float[] xCopy = (float[])x.Clone();
         for (int i = 0; i < gridSizeX + 2; i++)
         {
             for (int j = 0; j < gridSizeY + 2; j++)
             {
                 for (int k = 0; k < gridSizeZ + 2; k++)
                 {
-                    if (boundaryOffsets[i, j, k] != Vector3.zero)
+                    if (boundaryOffsets[ArrayIndex(i, j, k)] != Vector3.zero)
                     {
-                        x[i, j, k] = -x[i + boundaryOffsets[i, j, k].x, j + boundaryOffsets[i, j, k].y, k + boundaryOffsets[i, j, k].z];
+                        x[ArrayIndex(i, j, k)] = -x[ArrayIndex(i + boundaryOffsets[ArrayIndex(i, j, k)].x, j + boundaryOffsets[ArrayIndex(i, j, k)].y, k + boundaryOffsets[ArrayIndex(i, j, k)].z)];
                     }
                 }
             }

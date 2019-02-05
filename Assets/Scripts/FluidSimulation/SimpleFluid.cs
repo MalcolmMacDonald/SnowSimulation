@@ -2,38 +2,33 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
+using Unity.Jobs;
+using Unity.Burst;
 using System.Linq;
 
 public partial class SimpleFluid : MonoBehaviour
 {
-    Vector3 gridScale;
     [HideInInspector]
     public Vector3 cellSize;
+
+    public float timeStep = 0.1f;
+
+    [Space]
 
     public int gridSizeX;
     public int gridSizeY;
     public int gridSizeZ;
 
-
-
-    public float timeStep = 0.1f;
-
-
-    Vector3[,,] velocities;
-    Vector3[,,] prevVelocities;
-
-    Vector3Int[,,] boundaryOffsets;
-    bool[,,] collisionGrid;
-
-
+    [Space]
 
     public bool drawGrid;
     public bool drawBoundingBox;
     public bool drawVelocities;
     public bool drawParticles;
     public bool drawParticleVelocities;
-    public bool drawCaluclatedObjectNormals;
+    public bool drawCaluclatedBoundaries;
 
+    [Space]
 
     public bool resetParticlePositionAtBoundary;
 
@@ -42,52 +37,56 @@ public partial class SimpleFluid : MonoBehaviour
     public float viscocity;
     public float particleVelocity;
 
+    [Space]
 
     public Color gridColor;
     public Color velocitiesColor;
     public Color particlesColor;
 
-    float timer;
-    Vector2 previousMousePos;
+    [Space]
 
-
-    Vector3[] particles;
-    Vector3[] particleVelocities;
     public int particleGridSize;
-    int particleCount;
     public float velocityInputRadius;
 
-
+    [Space]
 
     public bool diffuse;
     public bool advect;
     public bool project;
 
+    int particleCount;
 
+    Vector3 gridScale;
     Bounds gridBounds;
 
-    // Use this for initialization
+
+    Vector3[] velocities;
+    Vector3[] prevVelocities;
+
+    Vector3[] particles;
+    Vector3[] particleVelocities;
+
+    Vector3Int[] boundaryOffsets;
+    bool[] collisionGrid;
+
     void Start()
     {
-
-
-
         float maxValue = Mathf.Max(gridSizeX, gridSizeY, gridSizeZ);
+        particleCount = particleGridSize * particleGridSize;
+
+
         gridScale = new Vector3(gridSizeX / maxValue, gridSizeY / maxValue, gridSizeZ / maxValue);
 
         cellSize = new Vector3(gridScale.x / (gridSizeX + 2), gridScale.y / (gridSizeY + 2), gridScale.z / (gridSizeZ + 2));
-        particleCount = particleGridSize * particleGridSize;
         particles = new Vector3[particleCount];
         particleVelocities = new Vector3[particleCount];
-        velocities = new Vector3[gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2];
-        prevVelocities = new Vector3[gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2];
-        boundaryOffsets = new Vector3Int[gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2];
-        collisionGrid = new bool[gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2];
+        velocities = new Vector3[(gridSizeX + 2) * (gridSizeY + 2) * (gridSizeZ + 2)];
+        prevVelocities = new Vector3[(gridSizeX + 2) * (gridSizeY + 2) * (gridSizeZ + 2)];
+        boundaryOffsets = new Vector3Int[(gridSizeX + 2) * (gridSizeY + 2) * (gridSizeZ + 2)];
+        collisionGrid = new bool[(gridSizeX + 2) * (gridSizeY + 2) * (gridSizeZ + 2)];
 
         SetBoundaryOffsets();
-        Vector2 previousMousePos = Camera.main.ScreenToViewportPoint(Input.mousePosition);
-        previousMousePos.x = Mathf.Clamp(previousMousePos.x, 0, 1f) * gridSizeX;
-        previousMousePos.y = Mathf.Clamp(previousMousePos.y, 0, 1f) * gridSizeY;
+
 
         Vector3 particleCellSize = new Vector3(gridSizeX / (float)particleGridSize, gridSizeY / (float)particleGridSize, gridSizeZ / (float)particleGridSize);
 
@@ -101,15 +100,12 @@ public partial class SimpleFluid : MonoBehaviour
         gridBounds = new Bounds(Vector3.Scale(cellSize, new Vector3(gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2) / 2f), Vector3.Scale(cellSize, new Vector3(gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2)));
     }
 
-    // Update is called once per frame
     void Update()
     {
         ParticlesStep();
 
 
         VelocityStep();
-
-
 
         if (drawGrid)
         {
@@ -133,24 +129,9 @@ public partial class SimpleFluid : MonoBehaviour
         {
             DrawParticleVelocities();
         }
-
-        if (drawCaluclatedObjectNormals)
+        if (drawCaluclatedBoundaries)
         {
-            for (int i = 0; i < gridSizeX + 2; i++)
-            {
-                for (int j = 0; j < gridSizeY + 2; j++)
-                {
-                    for (int k = 0; k < gridSizeZ + 2; k++)
-                    {
-                        Vector3 clampedVelocity = boundaryOffsets[i, j, k];
-                        clampedVelocity.x = Mathf.Clamp(clampedVelocity.x, -cellSize.x, cellSize.x);
-                        clampedVelocity.y = Mathf.Clamp(clampedVelocity.y, -cellSize.y, cellSize.y);
-                        clampedVelocity.z = Mathf.Clamp(clampedVelocity.z, -cellSize.z, cellSize.z);
-
-                        Debug.DrawRay(Vector3.Scale(new Vector3(0.5f + i, 0.5f + j, 0.5f + k), cellSize), clampedVelocity / 3f, velocitiesColor);
-                    }
-                }
-            }
+            DrawCalculatedBoundaries();
         }
 
     }
@@ -159,11 +140,9 @@ public partial class SimpleFluid : MonoBehaviour
     void VelocityStep()
     {
 
-        prevVelocities = (Vector3[,,])velocities.Clone();
+        prevVelocities = (Vector3[])velocities.Clone();
 
         AddVelocitySources();
-
-
 
         if (diffuse)
         {
@@ -181,14 +160,11 @@ public partial class SimpleFluid : MonoBehaviour
             SwapGrids(ref velocities, ref prevVelocities);
 
             AdvectVelocities(ref velocities, prevVelocities, timeStep);
-
         }
 
         if (project)
         {
-
             ProjectVelocities(ref velocities);
-
         }
 
     }
@@ -200,19 +176,12 @@ public partial class SimpleFluid : MonoBehaviour
         MoveParticles(ref particles, ref particleVelocities);
     }
 
-
-
-
-    void SwapGrids(ref Vector3[,,] a, ref Vector3[,,] b)
+    void SwapGrids(ref Vector3[] a, ref Vector3[] b)
     {
-        Vector3[,,] temp = (Vector3[,,])a.Clone();
-        a = (Vector3[,,])b.Clone();
-        b = (Vector3[,,])temp.Clone();
+        Vector3[] temp = (Vector3[])a.Clone();
+        a = (Vector3[])b.Clone();
+        b = (Vector3[])temp.Clone();
     }
-
-
-
-
 
     void DrawGrid()
     {
@@ -227,11 +196,13 @@ public partial class SimpleFluid : MonoBehaviour
             }
         }
     }
+
     void DrawBoundingBox()
     {
         Vector3 boundsCenter = Vector3.Scale(cellSize, new Vector3(gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2) / 2f);
         DrawCube(boundsCenter, boundsCenter, gridColor);
     }
+
     void DrawVelocities()
     {
         for (int i = 1; i <= gridSizeX; i++)
@@ -240,7 +211,7 @@ public partial class SimpleFluid : MonoBehaviour
             {
                 for (int k = 1; k <= gridSizeZ; k++)
                 {
-                    Vector3 clampedVelocity = velocities[i, j, k];
+                    Vector3 clampedVelocity = velocities[ArrayIndex(i, j, k)];
                     clampedVelocity.x = Mathf.Clamp(clampedVelocity.x, -cellSize.x, cellSize.x);
                     clampedVelocity.y = Mathf.Clamp(clampedVelocity.y, -cellSize.y, cellSize.y);
                     clampedVelocity.z = Mathf.Clamp(clampedVelocity.z, -cellSize.z, cellSize.z);
@@ -260,6 +231,7 @@ public partial class SimpleFluid : MonoBehaviour
             DrawCube(particlePos, cellSize * 0.1f, particlesColor);
         }
     }
+
     void DrawParticleVelocities()
     {
 
@@ -274,9 +246,26 @@ public partial class SimpleFluid : MonoBehaviour
             }
 
             Debug.DrawLine(Vector3.Scale(particles[i], cellSize), velocityPosition, particlesColor);
-
         }
+    }
 
+    void DrawCalculatedBoundaries()
+    {
+        for (int i = 0; i < gridSizeX + 2; i++)
+        {
+            for (int j = 0; j < gridSizeY + 2; j++)
+            {
+                for (int k = 0; k < gridSizeZ + 2; k++)
+                {
+                    Vector3 clampedVelocity = boundaryOffsets[ArrayIndex(i, j, k)];
+                    clampedVelocity.x = Mathf.Clamp(clampedVelocity.x, -cellSize.x, cellSize.x);
+                    clampedVelocity.y = Mathf.Clamp(clampedVelocity.y, -cellSize.y, cellSize.y);
+                    clampedVelocity.z = Mathf.Clamp(clampedVelocity.z, -cellSize.z, cellSize.z);
+
+                    Debug.DrawRay(Vector3.Scale(new Vector3(0.5f + i, 0.5f + j, 0.5f + k), cellSize), clampedVelocity / 3f, velocitiesColor);
+                }
+            }
+        }
     }
 
     void DrawCube(Vector3 position, Vector3 scale, Color color)
@@ -316,7 +305,8 @@ public partial class SimpleFluid : MonoBehaviour
         Debug.DrawLine(points[4], points[5], cubeColor);
         Debug.DrawLine(points[4], points[6], cubeColor);
     }
-    float3 TrilinearInterpolation(float3 position, Vector3[,,] array)
+
+    float3 TrilinearInterpolation(float3 position, Vector3[] array)
     {
         float x = position.x;
         float y = position.y;
@@ -340,15 +330,15 @@ public partial class SimpleFluid : MonoBehaviour
         float bottomDistance = y - bottomY;
         float backDistance = z - backZ;
 
-        float3 bottomLeftVel = array[leftX, bottomY, backZ];
-        float3 bottomRightVel = array[rightX, bottomY, backZ];
-        float3 topLeftVel = array[leftX, topY, backZ];
-        float3 topRightVel = array[rightX, topY, backZ];
+        float3 bottomLeftVel = array[ArrayIndex(leftX, bottomY, backZ)];
+        float3 bottomRightVel = array[ArrayIndex(rightX, bottomY, backZ)];
+        float3 topLeftVel = array[ArrayIndex(leftX, topY, backZ)];
+        float3 topRightVel = array[ArrayIndex(rightX, topY, backZ)];
 
-        float3 bottomLeftFrontVel = array[leftX, bottomY, frontZ];
-        float3 bottomRightFrontVel = array[rightX, bottomY, frontZ];
-        float3 topLeftFrontVel = array[leftX, topY, frontZ];
-        float3 topRightFrontVel = array[rightX, topY, frontZ];
+        float3 bottomLeftFrontVel = array[ArrayIndex(leftX, bottomY, frontZ)];
+        float3 bottomRightFrontVel = array[ArrayIndex(rightX, bottomY, frontZ)];
+        float3 topLeftFrontVel = array[ArrayIndex(leftX, topY, frontZ)];
+        float3 topRightFrontVel = array[ArrayIndex(rightX, topY, frontZ)];
 
 
         float3 leftVelLerp = math.lerp(bottomLeftVel, topLeftVel, bottomDistance);
@@ -363,4 +353,8 @@ public partial class SimpleFluid : MonoBehaviour
         return math.lerp(backLerp, frontLerp, backDistance);
     }
 
+    int ArrayIndex(int x, int y, int z)
+    {
+        return x + (y * (gridSizeX + 2)) + (z * (gridSizeX + 2) * (gridSizeY + 2));
+    }
 }

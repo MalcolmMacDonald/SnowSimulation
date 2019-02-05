@@ -384,18 +384,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellSize: {x: 0, y: 0, z: 0}
-  gridSizeX: 10
-  gridSizeY: 10
-  gridSizeZ: 10
+  gridSizeX: 20
+  gridSizeY: 20
+  gridSizeZ: 20
   timeStep: 0.02
   drawGrid: 0
-  drawBoundingBox: 0
+  drawBoundingBox: 1
   drawVelocities: 0
   drawParticles: 0
   drawParticleVelocities: 1
   drawCaluclatedObjectNormals: 0
   resetParticlePositionAtBoundary: 1
-  solverIterations: 40
+  solverIterations: 5
   velocitySourceRate: 10
   viscocity: 100
   particleVelocity: 5

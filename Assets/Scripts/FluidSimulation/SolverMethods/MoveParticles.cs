@@ -14,10 +14,10 @@ public partial class SimpleFluid
             newPos.z = Mathf.Clamp(newPos.z, 0, gridSizeZ + 1);
 
             Vector3Int clampedPos = Vector3Int.FloorToInt(newPos);
-            Vector3Int boundaryInt = boundaryOffsets[clampedPos.x, clampedPos.y, clampedPos.z];
+            Vector3Int boundaryInt = boundaryOffsets[ArrayIndex(clampedPos.x, clampedPos.y, clampedPos.z)];
 
 
-            if (boundaryInt != Vector3Int.zero || collisionGrid[clampedPos.x, clampedPos.y, clampedPos.z])
+            if (boundaryInt != Vector3Int.zero || collisionGrid[ArrayIndex(clampedPos.x, clampedPos.y, clampedPos.z)])
             {
                 if (resetParticlePositionAtBoundary)
                 {
