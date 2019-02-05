@@ -9,27 +9,27 @@ public partial class SimpleFluid
         for (int i = 0; i < particleCount; i++)
         {
             Vector3 newPos = p[i] + v[i] * timeStep * particleVelocity;
+            newPos.x = Mathf.Clamp(newPos.x, 0, gridSizeX + 1);
+            newPos.y = Mathf.Clamp(newPos.y, 0, gridSizeY + 1);
+            newPos.z = Mathf.Clamp(newPos.z, 0, gridSizeZ + 1);
 
-            if (resetParticlePositionAtBoundary)
+            Vector3Int clampedPos = Vector3Int.FloorToInt(newPos);
+            Vector3Int boundaryInt = boundaryOffsets[clampedPos.x, clampedPos.y, clampedPos.z];
+
+
+            if (boundaryInt != Vector3Int.zero || collisionGrid[clampedPos.x, clampedPos.y, clampedPos.z])
             {
-                if (newPos.x < 0 || newPos.x >= gridSizeX + 1 || newPos.y < 0 || newPos.y >= gridSizeY + 1 || newPos.z < 0 || newPos.z >= gridSizeZ + 1)
+                if (resetParticlePositionAtBoundary)
                 {
                     v[i] = Vector3.zero;
                     Vector3 particleCellSize = new Vector3(gridSizeX / (float)particleGridSize, gridSizeY / (float)particleGridSize, gridSizeZ / (float)particleGridSize);
                     newPos = new Vector3(UnityEngine.Random.Range(1, gridSizeX + 1f), UnityEngine.Random.Range(1, gridSizeY + 1f), UnityEngine.Random.Range(1, gridSizeZ + 1f));
                 }
-            }
-            else
-            {
-                if (newPos.x < 1 || newPos.x >= gridSizeX + 1 || newPos.y < 1 || newPos.y >= gridSizeY + 1 || newPos.z < 1 || newPos.z >= gridSizeZ + 1)
+                else
                 {
-                    newPos.x = Mathf.Clamp(newPos.x, 1, gridSizeX + 1);
-                    newPos.y = Mathf.Clamp(newPos.y, 1, gridSizeY + 1);
-                    newPos.z = Mathf.Clamp(newPos.z, 1, gridSizeZ + 1);
                     v[i] = newPos - p[i];
+                    newPos = p[i] + v[i] * timeStep * particleVelocity;
                 }
-
-
             }
 
             particles[i] = newPos;

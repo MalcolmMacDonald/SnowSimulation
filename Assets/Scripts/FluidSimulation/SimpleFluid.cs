@@ -23,6 +23,7 @@ public partial class SimpleFluid : MonoBehaviour
     Vector3[,,] prevVelocities;
 
     Vector3Int[,,] boundaryOffsets;
+    bool[,,] collisionGrid;
 
 
 
@@ -31,9 +32,9 @@ public partial class SimpleFluid : MonoBehaviour
     public bool drawVelocities;
     public bool drawParticles;
     public bool drawParticleVelocities;
+    public bool drawCaluclatedObjectNormals;
 
 
-    public bool addObstacle;
     public bool resetParticlePositionAtBoundary;
 
     public int solverIterations;
@@ -61,7 +62,6 @@ public partial class SimpleFluid : MonoBehaviour
     public bool diffuse;
     public bool advect;
     public bool project;
-    public bool vorticity;
 
 
     Bounds gridBounds;
@@ -82,6 +82,8 @@ public partial class SimpleFluid : MonoBehaviour
         velocities = new Vector3[gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2];
         prevVelocities = new Vector3[gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2];
         boundaryOffsets = new Vector3Int[gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2];
+        collisionGrid = new bool[gridSizeX + 2, gridSizeY + 2, gridSizeZ + 2];
+
         SetBoundaryOffsets();
         Vector2 previousMousePos = Camera.main.ScreenToViewportPoint(Input.mousePosition);
         previousMousePos.x = Mathf.Clamp(previousMousePos.x, 0, 1f) * gridSizeX;
@@ -102,12 +104,12 @@ public partial class SimpleFluid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        ParticlesStep();
 
 
         VelocityStep();
 
-        ParticlesStep();
+
 
         if (drawGrid)
         {
@@ -131,6 +133,26 @@ public partial class SimpleFluid : MonoBehaviour
         {
             DrawParticleVelocities();
         }
+
+        if (drawCaluclatedObjectNormals)
+        {
+            for (int i = 0; i < gridSizeX + 2; i++)
+            {
+                for (int j = 0; j < gridSizeY + 2; j++)
+                {
+                    for (int k = 0; k < gridSizeZ + 2; k++)
+                    {
+                        Vector3 clampedVelocity = boundaryOffsets[i, j, k];
+                        clampedVelocity.x = Mathf.Clamp(clampedVelocity.x, -cellSize.x, cellSize.x);
+                        clampedVelocity.y = Mathf.Clamp(clampedVelocity.y, -cellSize.y, cellSize.y);
+                        clampedVelocity.z = Mathf.Clamp(clampedVelocity.z, -cellSize.z, cellSize.z);
+
+                        Debug.DrawRay(Vector3.Scale(new Vector3(0.5f + i, 0.5f + j, 0.5f + k), cellSize), clampedVelocity / 3f, velocitiesColor);
+                    }
+                }
+            }
+        }
+
     }
 
 
@@ -248,9 +270,11 @@ public partial class SimpleFluid : MonoBehaviour
             Vector3 velocityPosition = Vector3.Scale(particles[i], cellSize) + remappedVelocity;
             if (!gridBounds.Contains(velocityPosition))
             {
-                velocityPosition = gridBounds.ClosestPoint(velocityPosition);
+                velocityPosition = gridBounds.ClosestPoint(Vector3.Scale(particles[i], cellSize) + remappedVelocity);
             }
+
             Debug.DrawLine(Vector3.Scale(particles[i], cellSize), velocityPosition, particlesColor);
+
         }
 
     }
